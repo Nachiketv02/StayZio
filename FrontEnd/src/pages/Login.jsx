@@ -1,7 +1,10 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useContext } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FaEnvelope, FaLock } from 'react-icons/fa'
+import { login } from '../services/User/UserApi';
+import { UserDataContext } from '../context/UserContex';
+
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -9,6 +12,8 @@ function Login() {
     password: ''
   })
   const [errors, setErrors] = useState({})
+  const { setUserData, setIsAuthenticated } = useContext(UserDataContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -40,12 +45,22 @@ function Login() {
     return newErrors
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const newErrors = validateForm()
     
     if (Object.keys(newErrors).length === 0) {
-      console.log('Form submitted:', formData)
+      try {
+        const response = await login(formData);
+        console.log('Login response:', response);
+        setUserData(response.user);
+        setIsAuthenticated(true);
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        navigate('/');
+      } catch (error) {
+        console.error('Login error:', error)
+      }
     } else {
       setErrors(newErrors)
     }
@@ -171,9 +186,9 @@ function Login() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+                <Link to="/forgot-password" className="font-medium text-primary-600 hover:text-primary-500 transition-colors">
                   Forgot password?
-                </a>
+                </Link>
               </div>
             </div>
 

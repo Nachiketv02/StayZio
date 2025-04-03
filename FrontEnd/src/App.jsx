@@ -10,6 +10,9 @@ import ListProperty from './pages/ListProperty'
 import PropertyDetails from './pages/PropertyDetails'
 import Dashboard from './pages/admin/Dashboard'
 import ComingSoon from './pages/ComingSoon'
+import OTPVerification from './pages/OTPVerification'
+import Profile from './pages/Profile'
+import ForgotPassword from './pages/ForgotPassword'
 
 function PublicLayout() {
   const location = useLocation()
@@ -27,6 +30,9 @@ function PublicLayout() {
         <Route path="/become-host" element={<BecomeHost />} />
         <Route path="/list-property" element={<ListProperty />} />
         <Route path="/coming-soon" element={<ComingSoon />} />
+        <Route path="/otp-verification" element={<OTPVerification />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
       <Footer />
     </>

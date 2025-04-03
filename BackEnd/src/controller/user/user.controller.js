@@ -231,7 +231,9 @@ module.exports.register = async (req, res) => {
     });
 
     const verificationCode = await newUser.generateVerificationCode();
-    await userModel.findByIdAndUpdate(newUser._id, { verificationCode });
+    newUser.verificationCode = verificationCode;
+    newUser.verificationCodeExpiry = Date.now() + 5 * 60 * 1000;
+    await newUser.save();
 
     await sendVerificationEmail(verificationCode, newUser, res);
 
