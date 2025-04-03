@@ -1,7 +1,9 @@
 const userModel = require("../../model/user/user.model");
+const crypto = require("crypto");
 const { validationResult } = require("express-validator");
 const { sendEmail } = require("../../utils/sendEmail");
 const { sendToken } = require("../../utils/sendToken");
+const blackListTokenModel = require("../../model/user/blackListTokenModel.model");
 
 function generateEmailVerificationLink(verificationCode, fullName) {
   return `<!DOCTYPE html>
@@ -321,10 +323,101 @@ module.exports.login = async (req, res) => {
     }
 
     return sendToken(user, 200, "User logged in successfully", res);
-    
+
   } catch (error) {
     console.error("Error in login controller:", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+module.exports.forgotPassword = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await userModel.findOne({ email, isVerified: true });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const resetPasswordToken = await user.generateResetPasswordToken();
+    await user.save();
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetPasswordToken}`;
+
+    const message = `Click on the following link to reset your password: ${resetUrl}`;
+    sendEmail({ email: user.email, subject: "Your Password Reset Code", message });
+    res.status(200).json({ message: "Password reset code sent" });
+  } catch (error) {
+    console.error("Error in forgotPassword controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports.resetPassword = async (req, res) => {
+  try {
+    const { password, confirmPassword } = req.body;
+    if (!password || !confirmPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    const { token } = req.params;
+    const resetPasswordToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await userModel.findOne({ resetPasswordToken, resetPasswordTokenExpiry: { $gt: Date.now() } });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    user.password = await userModel.hashPassword(password);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpiry = undefined;
+    await user.save();
+    return sendToken(user, 200, "Password reset successfully", res);
+  } catch (error) {
+    console.error("Error in resetPassword controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+module.exports.getProfile = async (req, res) => {
+  try {
+    const user = req.user;
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error in getProfile controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+module.exports.logoutUser = async (req, res) => {
+  try {
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const blackListToken = await blackListTokenModel.findOne({ token });
+    if (blackListToken) {
+      return res
+        .status(401)
+        .json({ error: "blackListToken find you are Unauthorized" });
+    }
+    await blackListTokenModel.create({ token });
+    res.clearCookie("token");
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log("Error in logoutUser Controller:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 
