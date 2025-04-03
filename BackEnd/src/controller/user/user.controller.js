@@ -228,8 +228,6 @@ module.exports.register = async (req, res) => {
       password: hashedPassword,
     });
 
-    console.log("New user created:", newUser);
-
     const verificationCode = await newUser.generateVerificationCode();
     await userModel.findByIdAndUpdate(newUser._id, { verificationCode });
 
@@ -293,9 +291,39 @@ module.exports.resendOtp = async (req, res) => {
     const message = generateEmailVerificationLink(newVerificationCode, user.fullName);
     sendEmail({ email: user.email, subject: "Your Verification Code", message });
     res.status(200).json({ message: "Verification code resent" });
-    
+
   } catch (error) {
     console.error("Error in resendOtp controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports.login = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const user = await userModel.findOne({ email, isVerified: true });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    return sendToken(user, 200, "User logged in successfully", res);
+    
+  } catch (error) {
+    console.error("Error in login controller:", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
 };
