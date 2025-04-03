@@ -1,6 +1,7 @@
 const userModel = require("../../model/user/user.model");
 const { validationResult } = require("express-validator");
 const { sendEmail } = require("../../utils/sendEmail");
+const { sendToken } = require("../../utils/sendToken");
 
 function generateEmailVerificationLink(verificationCode, fullName) {
   return `<!DOCTYPE html>
@@ -239,3 +240,63 @@ module.exports.register = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+module.exports.verifyUser = async (req, res) => {
+  try {
+    const { email, verificationCode } = req.body;
+
+    if (!email || !verificationCode) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const user = await userModel.findOne({ email, isVerified: false }).sort({createdAt: -1});
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    if (user.verificationCode !== verificationCode) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+
+    if(user.verificationCodeExpiry < Date.now()) {
+      return res.status(400).json({ message: "Verification code expired" });
+    }
+
+    user.isVerified = true;
+    user.verificationCode = undefined;
+    user.verificationCodeExpiry = undefined;
+    await user.save();
+    sendToken(user, 200, "User verified successfully", res);
+  } catch (error) {
+    console.error("Error in verifyUser controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports.resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await userModel.findOne({ email, isVerified: false });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const newVerificationCode = await user.generateVerificationCode();
+    user.verificationCode = newVerificationCode;
+    user.verificationCodeExpiry = Date.now() + 5 * 60 * 1000; //5 minutes
+    await user.save();
+    
+    const message = generateEmailVerificationLink(newVerificationCode, user.fullName);
+    sendEmail({ email: user.email, subject: "Your Verification Code", message });
+    res.status(200).json({ message: "Verification code resent" });
+    
+  } catch (error) {
+    console.error("Error in resendOtp controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+

@@ -13,4 +13,8 @@ router.post('/register', [
     body('confirmPassword').trim().isLength({ min: 6 }).withMessage("Confirm Password must be at least 6 characters long"),
 ], userController.register);
 
+router.post('/verify', userController.verifyUser);
+
+router.post('/resendOtp', userController.resendOtp);
+
 module.exports = router;
