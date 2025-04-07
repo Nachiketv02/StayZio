@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FaEnvelope, FaArrowLeft, FaSpinner } from 'react-icons/fa';
+import { forgotPassword } from '../services/User/UserApi';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -19,9 +20,8 @@ function ForgotPassword() {
     setIsLoading(true);
     setError('');
     
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await forgotPassword({ email });
       setIsEmailSent(true);
     } catch (err) {
       setError('Something went wrong. Please try again.');

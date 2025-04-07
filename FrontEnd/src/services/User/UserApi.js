@@ -74,7 +74,7 @@ export const resendOTP = async (email) => {
 
 export const forgotPassword = async (formData) => {
   try {
-    const response = await api.post("/forgot-password", formData);
+    const response = await api.post("/forgotPassword", formData);
     return response.data;
   } catch (error) {
     const errorMessage =
@@ -84,4 +84,20 @@ export const forgotPassword = async (formData) => {
     throw new Error(errorMessage);
   }
 };
+
+export const resetPassword = async (password, confirmPassword, token) => {
+  try {
+    console.log(password, confirmPassword, token);
+    const response = await api.put(`/reset-password/${token}`, { password, confirmPassword });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to reset password. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
 

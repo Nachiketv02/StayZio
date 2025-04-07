@@ -13,6 +13,10 @@ import ComingSoon from './pages/ComingSoon'
 import OTPVerification from './pages/OTPVerification'
 import Profile from './pages/Profile'
 import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import Destinations from './pages/Destinations'
+import Experiences from './pages/Experiences'
+import { Toaster } from 'react-hot-toast'
 
 function PublicLayout() {
   const location = useLocation()
@@ -23,6 +27,8 @@ function PublicLayout() {
       {!isComingSoonPage && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/destinations" element={<Destinations />} />
+        <Route path="/experiences" element={<Experiences />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/properties/:id" element={<PropertyDetails />} />
         <Route path="/login" element={<Login />} />
@@ -33,6 +39,7 @@ function PublicLayout() {
         <Route path="/otp-verification" element={<OTPVerification />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
       <Footer />
     </>
