@@ -1,138 +1,165 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FaCamera, FaMapMarkerAlt, FaBed, FaBath, FaDollarSign, FaHome, FaWifi, FaSwimmingPool, FaParking, FaTv, FaSnowflake, FaUtensils, FaWater, FaDumbbell, FaDog, FaUmbrellaBeach, FaBuilding, FaWarehouse, FaHotel, FaCity } from 'react-icons/fa'
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaCamera,
+  FaMapMarkerAlt,
+  FaBed,
+  FaBath,
+  FaRupeeSign,
+  FaHome,
+  FaWifi,
+  FaSwimmingPool,
+  FaParking,
+  FaTv,
+  FaSnowflake,
+  FaUtensils,
+  FaWater,
+  FaDumbbell,
+  FaDog,
+  FaUmbrellaBeach,
+  FaBuilding,
+  FaWarehouse,
+  FaHotel,
+  FaCity,
+  FaFlag
+} from "react-icons/fa";
 
 function ListProperty() {
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: '',
-    location: '',
-    price: '',
-    bedrooms: '',
-    bathrooms: '',
+    title: "",
+    description: "",
+    type: "",
+    location: "",
+    price: "",
+    bedrooms: "",
+    bathrooms: "",
     amenities: [],
-    images: []
-  })
+    images: [],
+  });
 
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState({});
 
   const propertyTypes = [
-    { value: 'Apartment', icon: FaBuilding },
-    { value: 'House', icon: FaHome },
-    { value: 'Villa', icon: FaHotel },
-    { value: 'Condo', icon: FaCity },
-    { value: 'Townhouse', icon: FaWarehouse },
-    { value: 'Studio', icon: FaHome },
-    { value: 'Other', icon: FaHome }
-  ]
+    { value: "Apartment", icon: FaBuilding },
+    { value: "House", icon: FaHome },
+    { value: "Villa", icon: FaHotel },
+    { value: "Condo", icon: FaCity },
+    { value: "Townhouse", icon: FaWarehouse },
+    { value: "Studio", icon: FaHome },
+    { value: "Other", icon: FaHome },
+  ];
 
   const amenitiesList = [
-    { value: 'WiFi', icon: FaWifi },
-    { value: 'Air Conditioning', icon: FaSnowflake },
-    { value: 'Parking', icon: FaParking },
-    { value: 'Swimming Pool', icon: FaSwimmingPool },
-    { value: 'Gym', icon: FaDumbbell },
-    { value: 'Kitchen', icon: FaUtensils },
-    { value: 'Beach Access', icon: FaUmbrellaBeach },
-    { value: 'TV', icon: FaTv },
-    { value: 'Ocean View', icon: FaWater },
-    { value: 'Pet Friendly', icon: FaDog }
-  ]
+    { value: "WiFi", icon: FaWifi },
+    { value: "Air Conditioning", icon: FaSnowflake },
+    { value: "Parking", icon: FaParking },
+    { value: "Swimming Pool", icon: FaSwimmingPool },
+    { value: "Gym", icon: FaDumbbell },
+    { value: "Kitchen", icon: FaUtensils },
+    { value: "Beach Access", icon: FaUmbrellaBeach },
+    { value: "TV", icon: FaTv },
+    { value: "Ocean View", icon: FaWater },
+    { value: "Pet Friendly", icon: FaDog },
+  ];
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
+      [name]: value,
+    }));
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
-      }))
+        [name]: "",
+      }));
     }
-  }
+  };
 
   const handlePropertyTypeSelect = (type) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      type
-    }))
+      type,
+    }));
     if (errors.type) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        type: ''
-      }))
+        type: "",
+      }));
     }
-  }
+  };
 
   const handleAmenitiesChange = (amenity) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
-    }))
-  }
+        ? prev.amenities.filter((a) => a !== amenity)
+        : [...prev.amenities, amenity],
+    }));
+  };
 
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files)
-    setFormData(prev => ({
+    const files = Array.from(e.target.files);
+    setFormData((prev) => ({
       ...prev,
-      images: [...prev.images, ...files]
-    }))
-  }
+      images: [...prev.images, ...files],
+    }));
+  };
 
   const validateStep = (step) => {
-    const newErrors = {}
-    
+    const newErrors = {};
+
     if (step === 1) {
-      if (!formData.title.trim()) newErrors.title = 'Title is required'
-      if (!formData.description.trim()) newErrors.description = 'Description is required'
-      if (!formData.type) newErrors.type = 'Property type is required'
+      if (!formData.title.trim()) newErrors.title = "Title is required";
+      if (!formData.description.trim())
+        newErrors.description = "Description is required";
+      if (!formData.type) newErrors.type = "Property type is required";
     } else if (step === 2) {
-      if (!formData.location.trim()) newErrors.location = 'Location is required'
-      if (!formData.price || isNaN(formData.price)) newErrors.price = 'Valid price is required'
-      if (!formData.bedrooms || isNaN(formData.bedrooms)) newErrors.bedrooms = 'Number of bedrooms is required'
-      if (!formData.bathrooms || isNaN(formData.bathrooms)) newErrors.bathrooms = 'Number of bathrooms is required'
+      if (!formData.location.trim())
+        newErrors.location = "Location is required";
+      if (!formData.price || isNaN(formData.price))
+        newErrors.price = "Valid price is required";
+      if (!formData.bedrooms || isNaN(formData.bedrooms))
+        newErrors.bedrooms = "Number of bedrooms is required";
+      if (!formData.bathrooms || isNaN(formData.bathrooms))
+        newErrors.bathrooms = "Number of bathrooms is required";
     }
-    
-    return newErrors
-  }
+
+    return newErrors;
+  };
 
   const handleNextStep = () => {
-    const newErrors = validateStep(currentStep)
+    const newErrors = validateStep(currentStep);
     if (Object.keys(newErrors).length === 0) {
-      setCurrentStep(prev => prev + 1)
+      setCurrentStep((prev) => prev + 1);
     } else {
-      setErrors(newErrors)
+      setErrors(newErrors);
     }
-  }
+  };
 
   const handlePrevStep = () => {
-    setCurrentStep(prev => prev - 1)
-  }
+    setCurrentStep((prev) => prev - 1);
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    const newErrors = validateStep(currentStep)
-    
+    e.preventDefault();
+    const newErrors = validateStep(currentStep);
+
     if (Object.keys(newErrors).length === 0) {
-      console.log('Form submitted:', formData)
+      console.log("Form submitted:", formData);
       // Here you would typically send the data to your backend
     } else {
-      setErrors(newErrors)
+      setErrors(newErrors);
     }
-  }
+  };
 
   const steps = [
     { number: 1, title: "Basic Info" },
     { number: 2, title: "Details" },
     { number: 3, title: "Amenities" },
-    { number: 4, title: "Photos" }
-  ]
+    { number: 4, title: "Photos" },
+  ];
 
   return (
     <div className="min-h-screen pt-20 bg-gradient-to-br from-gray-50 to-primary-50">
@@ -146,20 +173,27 @@ function ListProperty() {
           <div className="mb-12">
             <div className="flex justify-between items-center relative">
               {steps.map((step, index) => (
-                <div key={index} className="flex flex-col items-center relative z-10">
+                <div
+                  key={index}
+                  className="flex flex-col items-center relative z-10"
+                >
                   <motion.div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
                       currentStep >= step.number
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-200 text-gray-500'
+                        ? "bg-primary-600 text-white"
+                        : "bg-gray-200 text-gray-500"
                     }`}
                     whileHover={{ scale: 1.1 }}
                   >
                     {step.number}
                   </motion.div>
-                  <span className={`mt-2 text-sm font-medium ${
-                    currentStep >= step.number ? 'text-primary-600' : 'text-gray-500'
-                  }`}>
+                  <span
+                    className={`mt-2 text-sm font-medium ${
+                      currentStep >= step.number
+                        ? "text-primary-600"
+                        : "text-gray-500"
+                    }`}
+                  >
                     {step.title}
                   </span>
                 </div>
@@ -169,7 +203,9 @@ function ListProperty() {
                 <motion.div
                   className="h-full bg-primary-600"
                   initial={{ width: "0%" }}
-                  animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+                  animate={{
+                    width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
+                  }}
                   transition={{ duration: 0.3 }}
                 />
               </div>
@@ -187,16 +223,18 @@ function ListProperty() {
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-lg font-medium text-gray-700 mb-2">Property Title</label>
+                    <label className="block text-lg font-medium text-gray-700 mb-2">
+                      Property Title
+                    </label>
                     <input
                       type="text"
                       name="title"
                       value={formData.title}
                       onChange={handleChange}
                       className={`block w-full rounded-xl border ${
-                        errors.title ? 'border-red-300' : 'border-gray-300'
+                        errors.title ? "border-red-300" : "border-gray-300"
                       } px-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
-                      placeholder="e.g., Luxury Beachfront Villa"
+                      placeholder="Luxury Beachfront Villa"
                     />
                     {errors.title && (
                       <motion.p
@@ -210,14 +248,18 @@ function ListProperty() {
                   </div>
 
                   <div>
-                    <label className="block text-lg font-medium text-gray-700 mb-2">Description</label>
+                    <label className="block text-lg font-medium text-gray-700 mb-2">
+                      Description
+                    </label>
                     <textarea
                       name="description"
                       value={formData.description}
                       onChange={handleChange}
                       rows={4}
                       className={`block w-full rounded-xl border ${
-                        errors.description ? 'border-red-300' : 'border-gray-300'
+                        errors.description
+                          ? "border-red-300"
+                          : "border-gray-300"
                       } px-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
                       placeholder="Describe your property..."
                     />
@@ -233,7 +275,9 @@ function ListProperty() {
                   </div>
 
                   <div>
-                    <label className="block text-lg font-medium text-gray-700 mb-4">Property Type</label>
+                    <label className="block text-lg font-medium text-gray-700 mb-4">
+                      Property Type
+                    </label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {propertyTypes.map(({ value, icon: Icon }) => (
                         <motion.button
@@ -244,14 +288,20 @@ function ListProperty() {
                           whileTap={{ scale: 0.98 }}
                           className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200 ${
                             formData.type === value
-                              ? 'border-primary-500 bg-primary-50 text-primary-600'
-                              : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+                              ? "border-primary-500 bg-primary-50 text-primary-600"
+                              : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
                           }`}
                         >
-                          <Icon className={`w-6 h-6 ${
-                            formData.type === value ? 'text-primary-500' : 'text-gray-400'
-                          }`} />
-                          <span className="mt-2 text-sm font-medium">{value}</span>
+                          <Icon
+                            className={`w-6 h-6 ${
+                              formData.type === value
+                                ? "text-primary-500"
+                                : "text-gray-400"
+                            }`}
+                          />
+                          <span className="mt-2 text-sm font-medium">
+                            {value}
+                          </span>
                         </motion.button>
                       ))}
                     </div>
@@ -278,7 +328,9 @@ function ListProperty() {
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-lg font-medium text-gray-700 mb-2">Location</label>
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
+                        Location
+                      </label>
                       <div className="relative">
                         <FaMapMarkerAlt className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
@@ -287,9 +339,11 @@ function ListProperty() {
                           value={formData.location}
                           onChange={handleChange}
                           className={`block w-full rounded-xl border ${
-                            errors.location ? 'border-red-300' : 'border-gray-300'
+                            errors.location
+                              ? "border-red-300"
+                              : "border-gray-300"
                           } pl-12 pr-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
-                          placeholder="e.g., Miami, FL"
+                          placeholder="Surat, Gujarat"
                         />
                       </div>
                       {errors.location && (
@@ -304,18 +358,50 @@ function ListProperty() {
                     </div>
 
                     <div>
-                      <label className="block text-lg font-medium text-gray-700 mb-2">Price per Night</label>
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
+                        Country
+                      </label>
                       <div className="relative">
-                        <FaDollarSign className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <FaFlag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          name="country"
+                          value={formData.country}
+                          onChange={handleChange}
+                          className={`block w-full rounded-xl border ${
+                            errors.country
+                              ? "border-red-300"
+                              : "border-gray-300"
+                          } pl-12 pr-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
+                          placeholder="India"
+                        />
+                      </div>
+                      {errors.country && (
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="mt-2 text-sm text-red-600"
+                        >
+                          {errors.country}
+                        </motion.p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
+                        Price per Night
+                      </label>
+                      <div className="relative">
+                        <FaRupeeSign className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                           type="number"
                           name="price"
                           value={formData.price}
                           onChange={handleChange}
                           className={`block w-full rounded-xl border ${
-                            errors.price ? 'border-red-300' : 'border-gray-300'
+                            errors.price ? "border-red-300" : "border-gray-300"
                           } pl-12 pr-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
-                          placeholder="e.g., 150"
+                          placeholder="1500"
                         />
                       </div>
                       {errors.price && (
@@ -330,7 +416,9 @@ function ListProperty() {
                     </div>
 
                     <div>
-                      <label className="block text-lg font-medium text-gray-700 mb-2">Bedrooms</label>
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
+                        Bedrooms
+                      </label>
                       <div className="relative">
                         <FaBed className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
@@ -339,9 +427,11 @@ function ListProperty() {
                           value={formData.bedrooms}
                           onChange={handleChange}
                           className={`block w-full rounded-xl border ${
-                            errors.bedrooms ? 'border-red-300' : 'border-gray-300'
+                            errors.bedrooms
+                              ? "border-red-300"
+                              : "border-gray-300"
                           } pl-12 pr-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
-                          placeholder="e.g., 2"
+                          placeholder="2"
                         />
                       </div>
                       {errors.bedrooms && (
@@ -356,7 +446,9 @@ function ListProperty() {
                     </div>
 
                     <div>
-                      <label className="block text-lg font-medium text-gray-700 mb-2">Bathrooms</label>
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
+                        Bathrooms
+                      </label>
                       <div className="relative">
                         <FaBath className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
@@ -365,9 +457,11 @@ function ListProperty() {
                           value={formData.bathrooms}
                           onChange={handleChange}
                           className={`block w-full rounded-xl border ${
-                            errors.bathrooms ? 'border-red-300' : 'border-gray-300'
+                            errors.bathrooms
+                              ? "border-red-300"
+                              : "border-gray-300"
                           } pl-12 pr-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
-                          placeholder="e.g., 2"
+                          placeholder="2"
                         />
                       </div>
                       {errors.bathrooms && (
@@ -393,7 +487,9 @@ function ListProperty() {
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-lg font-medium text-gray-700 mb-4">Available Amenities</label>
+                    <label className="block text-lg font-medium text-gray-700 mb-4">
+                      Available Amenities
+                    </label>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {amenitiesList.map(({ value, icon: Icon }) => (
                         <motion.div
@@ -414,7 +510,9 @@ function ListProperty() {
                             className="flex items-center p-4 bg-white rounded-xl border-2 border-gray-200 cursor-pointer transition-all peer-checked:border-primary-500 peer-checked:bg-primary-50 hover:bg-gray-50"
                           >
                             <Icon className="w-5 h-5 text-gray-500 peer-checked:text-primary-500" />
-                            <span className="ml-3 text-sm font-medium">{value}</span>
+                            <span className="ml-3 text-sm font-medium">
+                              {value}
+                            </span>
                           </label>
                         </motion.div>
                       ))}
@@ -432,7 +530,9 @@ function ListProperty() {
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-lg font-medium text-gray-700 mb-4">Property Photos</label>
+                    <label className="block text-lg font-medium text-gray-700 mb-4">
+                      Property Photos
+                    </label>
                     <motion.div
                       className="border-3 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50"
                       whileHover={{ scale: 1.01 }}
@@ -446,10 +546,7 @@ function ListProperty() {
                         className="hidden"
                         id="images"
                       />
-                      <label
-                        htmlFor="images"
-                        className="cursor-pointer block"
-                      >
+                      <label htmlFor="images" className="cursor-pointer block">
                         <FaCamera className="mx-auto h-16 w-16 text-gray-400" />
                         <motion.div
                           className="mt-4 flex items-center justify-center"
@@ -510,7 +607,9 @@ function ListProperty() {
               )}
               <motion.button
                 type={currentStep === steps.length ? "submit" : "button"}
-                onClick={currentStep === steps.length ? undefined : handleNextStep}
+                onClick={
+                  currentStep === steps.length ? undefined : handleNextStep
+                }
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 ml-auto"
@@ -522,7 +621,7 @@ function ListProperty() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ListProperty
+export default ListProperty;

@@ -97,7 +97,7 @@ function OTPVerification() {
       setIsAuthenticated(true);
       setIsSuccess(true);
       setTimeout(() => {
-        navigate("/login", { state: { verified: true } });
+        navigate("/", { state: { verified: true } });
       }, 2000);
     } catch (err) {
       setError(err.message || "Invalid OTP. Please try again.");

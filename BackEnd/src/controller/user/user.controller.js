@@ -384,7 +384,7 @@ module.exports.resetPassword = async (req, res) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordTokenExpiry = undefined;
     await user.save();
-    return sendToken(user, 200, "Password reset successfully", res);
+    res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
     console.error("Error in resetPassword controller:", error.message);
     res.status(500).json({ message: "Internal server error" });

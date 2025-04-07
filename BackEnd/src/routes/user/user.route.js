@@ -3,6 +3,8 @@ const router = express.Router();
 const {body} = require("express-validator");
 const userController = require("../../controller/user/user.controller");
 const authMiddleware = require("../../middleware/auth.middleware");
+const propertyListingController = require("../../controller/user/properttyListing.controller");
+const upload = require("../../middleware/upload");
 
 
 router.post('/register', [
@@ -32,5 +34,25 @@ router.put('/reset-password/:token', userController.resetPassword);
 router.get('/profile', authMiddleware.isAuthenticated, userController.getProfile);
 
 router.post('/logout', authMiddleware.isAuthenticated, userController.logoutUser);
+
+// Property Listing Routes
+
+router.post(
+    '/list-property',
+    upload.array('images', 10), // ✅ must come first to parse multipart/form-data
+    [
+      body('title').trim().notEmpty().withMessage("Title is required"),
+      body('description').trim().notEmpty().withMessage("Description is required"),
+      body('type').trim().notEmpty().withMessage("Type is required"),
+      body('location').trim().notEmpty().withMessage("Location is required"),
+      body('country').trim().notEmpty().withMessage("Country is required"),
+      body('price').trim().notEmpty().withMessage("Price is required"),
+      body('bedrooms').trim().notEmpty().withMessage("Bedrooms is required"),
+      body('bathrooms').trim().notEmpty().withMessage("Bathrooms is required"),
+      body('amenities').isArray().withMessage("Amenities must be an array"),
+    ],
+    authMiddleware.isAuthenticated,
+    propertyListingController.listProperty
+  );
 
 module.exports = router;
