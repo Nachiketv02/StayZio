@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FaHome, FaMoneyBillWave, FaCalendarAlt, FaUsers, FaStar, FaCheckCircle } from 'react-icons/fa'
+import { FaMoneyBillWave, FaCalendarAlt, FaUsers, FaCheckCircle , FaStar } from 'react-icons/fa'
 import {useNavigate} from 'react-router-dom';
 
 function BecomeHost() {
@@ -70,7 +70,7 @@ function BecomeHost() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                  navigate('/list-property');
+                navigate('/list-property');
               }}
             >
               Get Started Now

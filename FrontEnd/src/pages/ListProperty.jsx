@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaCamera,
@@ -29,6 +29,7 @@ import { listProperty } from "../services/User/UserApi";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
+import { UserDataContext } from "../context/UserContex";
 
 function ListProperty() {
   const navigate = useNavigate();
@@ -48,6 +49,8 @@ function ListProperty() {
     amenities: [],
     images: [],
   });
+
+  const { userData, setUserData, isAuthenticated, setIsAuthenticated } = useContext(UserDataContext);
 
   const [errors, setErrors] = useState({});
 
@@ -112,8 +115,6 @@ function ListProperty() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-
-    // Validate file types and sizes
     const validFiles = files.filter((file) => {
       const validTypes = ["image/jpeg", "image/png", "image/jpg"];
       const maxSize = 5 * 1024 * 1024; // 5MB
@@ -175,7 +176,6 @@ function ListProperty() {
       setCurrentStep((prev) => prev + 1);
     } else {
       setErrors(newErrors);
-      // Scroll to first error
       const firstError = Object.keys(newErrors)[0];
       document.getElementsByName(firstError)[0]?.scrollIntoView({
         behavior: "smooth",
@@ -269,7 +269,11 @@ function ListProperty() {
       formData.images.forEach((image) => {
         formDataToSend.append("images", image);
       });
-  
+
+      if (!isAuthenticated) {
+        toast.error("Please log in to list a property");
+        return;
+      }
       const response = await listProperty(formDataToSend);
   
       if (response && response.success) {

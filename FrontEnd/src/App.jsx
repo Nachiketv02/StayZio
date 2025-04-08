@@ -18,11 +18,12 @@ import Destinations from './pages/Destinations'
 import Experiences from './pages/Experiences'
 import MyProperties from './pages/MyProperties'
 import Favorites from './pages/Favorites'
+import ProtectedRoute from './context/ProtectedRoute';
 import { Toaster } from 'react-hot-toast'
 
 function PublicLayout() {
-  const location = useLocation()
-  const isComingSoonPage = location.pathname === '/coming-soon'
+  const location = useLocation();
+  const isComingSoonPage = location.pathname === '/coming-soon';
   
   return (
     <>
@@ -32,18 +33,18 @@ function PublicLayout() {
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/experiences" element={<Experiences />} />
         <Route path="/properties" element={<Properties />} />
-        <Route path="/properties/:id" element={<PropertyDetails />} />
+        <Route path="/properties/:id" element={<ProtectedRoute><PropertyDetails /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/become-host" element={<BecomeHost />} />
-        <Route path="/list-property" element={<ListProperty />} />
+        <Route path="/list-property" element={<ProtectedRoute><ListProperty /></ProtectedRoute>} />
         <Route path="/coming-soon" element={<ComingSoon />} />
         <Route path="/otp-verification" element={<OTPVerification />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/my-properties" element={<MyProperties />} />
-        <Route path="/favorites" element={<Favorites />} />
+        <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
       </Routes>
       <Footer />
     </>

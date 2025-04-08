@@ -5,13 +5,13 @@ import { FaEnvelope, FaLock } from 'react-icons/fa'
 import { login } from '../services/User/UserApi';
 import { UserDataContext } from '../context/UserContex';
 
-
 function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
   const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('');
   const { setUserData, setIsAuthenticated } = useContext(UserDataContext);
   const navigate = useNavigate();
 
@@ -21,6 +21,7 @@ function Login() {
       ...prev,
       [name]: value
     }))
+    setServerError(''); // clear server error when user types
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -31,24 +32,24 @@ function Login() {
 
   const validateForm = () => {
     const newErrors = {}
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required'
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid'
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required'
     }
-    
+
     return newErrors
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const newErrors = validateForm()
-    
+
     if (Object.keys(newErrors).length === 0) {
       try {
         const response = await login(formData);
@@ -60,6 +61,7 @@ function Login() {
         navigate('/');
       } catch (error) {
         console.error('Login error:', error)
+        setServerError(error.response?.data?.message || 'Login failed. Please try again.');
       }
     } else {
       setErrors(newErrors)
@@ -108,6 +110,17 @@ function Login() {
       >
         <div className="bg-white/70 backdrop-blur-xl py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10 border border-white/20">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            
+            {serverError && (
+              <motion.p 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-red-600 text-center"
+              >
+                {serverError}
+              </motion.p>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address

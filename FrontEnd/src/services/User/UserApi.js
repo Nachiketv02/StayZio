@@ -36,12 +36,14 @@ export const verifyOTP = async (email, verificationCode ) => {
 export const login = async (formData) => {
   try {
     const response = await api.post("/login", formData);
+    console.log(response);
     return response.data;
   } catch (error) {
+    console.error('Login error:', error);
     const errorMessage =
-      error.response?.data?.message ||
-      error.message ||
-      "Login failed. Please try again.";
+      error.response?.data?.message 
+      // error.message ||
+      // "Login failed. Please try again.";
     throw new Error(errorMessage);
   }
 };
