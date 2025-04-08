@@ -7,6 +7,7 @@ import {
   FaUserCircle,
   FaChevronDown,
   FaHeart,
+  FaHome,
 } from "react-icons/fa";
 import { UserDataContext } from "../context/UserContex";
 import { logout } from "../services/User/UserApi";
@@ -65,6 +66,11 @@ function Navbar() {
 
   const handleProfile = () => {
     navigate("/profile");
+    setIsProfileOpen(false);
+  };
+
+  const handleMyProperties = () => {
+    navigate("/my-properties");
     setIsProfileOpen(false);
   };
 
@@ -192,6 +198,14 @@ function Navbar() {
                         >
                           <FaUser className="w-4 h-4 mr-2" />
                           Profile
+                        </motion.button>
+                        <motion.button
+                          className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          onClick={handleMyProperties}
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <FaHome className="w-4 h-4 mr-2" />
+                          My Properties
                         </motion.button>
                         <motion.button
                           className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"

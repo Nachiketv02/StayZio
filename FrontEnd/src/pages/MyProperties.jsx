@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   FaSearch,
-  FaFilter,
   FaSort,
   FaEdit,
   FaTrash,
@@ -16,78 +15,46 @@ import {
   FaSwimmingPool,
   FaParking,
   FaTv,
-  FaPlus
+  FaPlus,
+  FaSnowflake,
+  FaUtensils,
+  FaWater,
+  FaDumbbell,
+  FaDog,
+  FaUmbrellaBeach,
 } from 'react-icons/fa';
+import { getMyProperties } from '../services/User/UserApi';
+import { useNavigate } from 'react-router-dom';
 
 function MyProperties() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [isLoading, setIsLoading] = useState(true);
   const [properties, setProperties] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
-  // Mock data - replace with actual API call
   useEffect(() => {
     const fetchProperties = async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setProperties([
-        {
-          id: 1,
-          title: "Luxury Beachfront Villa",
-          location: "Bali, Indonesia",
-          price: 3500,
-          status: "active",
-          rating: 4.9,
-          reviews: 128,
-          image: "https://images.unsplash.com/photo-1582610116397-edb318620f90?auto=format&fit=crop&q=80",
-          amenities: ["WiFi", "Pool", "Parking", "TV"],
-          bedrooms: 4,
-          bathrooms: 3,
-          lastUpdated: "2024-02-15"
-        },
-        {
-          id: 2,
-          title: "Modern City Apartment",
-          location: "Tokyo, Japan",
-          price: 2000,
-          status: "pending",
-          rating: 4.8,
-          reviews: 96,
-          image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80",
-          amenities: ["WiFi", "Parking", "TV"],
-          bedrooms: 2,
-          bathrooms: 1,
-          lastUpdated: "2024-02-14"
-        },
-        {
-          id: 3,
-          title: "Mountain View Chalet",
-          location: "Swiss Alps",
-          price: 4500,
-          status: "inactive",
-          rating: 4.7,
-          reviews: 75,
-          image: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&q=80",
-          amenities: ["WiFi", "Parking", "TV", "Pool"],
-          bedrooms: 3,
-          bathrooms: 2,
-          lastUpdated: "2024-02-13"
-        }
-      ]);
-      setIsLoading(false);
+      try {
+        const properties = await getMyProperties();
+        setProperties(properties);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchProperties();
   }, []);
 
   const filteredProperties = properties.filter(property => {
-    const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         property.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || property.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    return property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           property.location.toLowerCase().includes(searchTerm.toLowerCase());
   }).sort((a, b) => {
     switch (sortBy) {
       case 'price-high':
@@ -102,19 +69,6 @@ function MyProperties() {
         return new Date(b.lastUpdated) - new Date(a.lastUpdated);
     }
   });
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'inactive':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const handleDelete = (property) => {
     setPropertyToDelete(property);
@@ -142,6 +96,18 @@ function MyProperties() {
         return <FaParking className="w-4 h-4" />;
       case 'TV':
         return <FaTv className="w-4 h-4" />;
+      case 'Air Conditioning':
+        return <FaSnowflake className="w-4 h-4" />;
+      case 'Gym':
+        return <FaDumbbell className="w-4 h-4" />;
+      case 'Dog':
+        return <FaDog className="w-4 h-4" />;
+      case 'Beach Access':
+        return <FaUmbrellaBeach className="w-4 h-4" />;
+      case 'Kitchen':
+        return <FaUtensils className="w-4 h-4" />;
+      case 'Ocean View':
+        return <FaWater className="w-4 h-4" />;
       default:
         return null;
     }
@@ -170,7 +136,7 @@ function MyProperties() {
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -180,20 +146,6 @@ function MyProperties() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <FaFilter className="text-gray-400" />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="inactive">Inactive</option>
-              </select>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -229,7 +181,7 @@ function MyProperties() {
             <AnimatePresence>
               {filteredProperties.map((property) => (
                 <motion.div
-                  key={property.id}
+                  key={property._id}
                   layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -238,17 +190,10 @@ function MyProperties() {
                 >
                   <div className="relative">
                     <img
-                      src={property.image}
+                      src={property.images?.[0]?.url}
                       alt={property.title}
                       className="w-full h-48 object-cover"
                     />
-                    <span
-                      className={`absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                        property.status
-                      )}`}
-                    >
-                      {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-                    </span>
                   </div>
 
                   <div className="p-4">
@@ -258,7 +203,7 @@ function MyProperties() {
                     
                     <div className="flex items-center text-gray-600 mb-3">
                       <FaMapMarkerAlt className="w-4 h-4 mr-1" />
-                      <span className="text-sm">{property.location}</span>
+                      <span className="text-sm">{property.location}, {property.country}</span>
                     </div>
 
                     <div className="flex items-center justify-between mb-3">
@@ -290,7 +235,7 @@ function MyProperties() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-xl font-bold text-primary-600">
-                        ${property.price}
+                        ₹{property.price.toLocaleString('en-IN')}
                         <span className="text-sm font-normal text-gray-500">/night</span>
                       </span>
                       <div className="flex space-x-2">

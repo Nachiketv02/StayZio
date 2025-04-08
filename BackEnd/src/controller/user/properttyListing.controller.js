@@ -3,7 +3,6 @@ const propertyListingModel = require("../../model/user/propertyListing.model");
 
 module.exports.listProperty = async (req, res) => {
   try {
-    // First check for files (must come before validation)
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         success: false,
@@ -11,7 +10,6 @@ module.exports.listProperty = async (req, res) => {
       });
     }
 
-    // Then run validation
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({
@@ -21,7 +19,6 @@ module.exports.listProperty = async (req, res) => {
       });
     }
 
-    // Process amenities - handle both FormData and JSON
     let amenities = [];
     if (req.body.amenities) {
       if (Array.isArray(req.body.amenities)) {
@@ -35,7 +32,6 @@ module.exports.listProperty = async (req, res) => {
         : [req.body['amenities[]']];
     }
 
-    // Create property
     const property = new propertyListingModel({
       title: req.body.title,
       description: req.body.description,
@@ -68,3 +64,65 @@ module.exports.listProperty = async (req, res) => {
     });
   }
 };
+
+module.exports.getAllProperties = async (req, res) => {
+  try {
+    const properties = await propertyListingModel.find({
+      userId: { $ne: req.user._id }
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Properties fetched successfully",
+      data: properties
+    });
+  } catch (error) {
+    console.error("Error in fetching properties:", error.message);
+    return res.status(400).json({
+      success: false,
+      message: "Failed to fetch properties. Please try again.",
+    });
+  }
+};
+
+module.exports.myProperties = async (req, res) => {
+  try {
+    const properties = await propertyListingModel.find({
+      userId: req.user._id
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Properties fetched successfully",
+      data: properties
+    });
+  } catch (error) {
+    console.error("Error in fetching properties:", error.message);
+    return res.status(400).json({
+      success: false,
+      message: "Failed to fetch properties. Please try again.",
+    });
+  }
+};
+
+module.exports.getPropertyById = async (req, res) => {
+  try {
+    const property = await propertyListingModel.findById(req.params.id);
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found", 
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Property fetched successfully", 
+      data: property
+    });
+  } catch (error) {
+    console.error("Error in fetching property:", error.message);
+    return res.status(400).json({
+      success: false,
+      message: "Failed to fetch property. Please try again.",
+    });
+  }
+};
+

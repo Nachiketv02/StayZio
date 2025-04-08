@@ -53,7 +53,12 @@ router.post(
     body('bathrooms').isInt({ min: 0 }).withMessage("Bathrooms must be a positive integer"),
     body('amenities').optional().isArray().withMessage("Amenities must be an array"),
   ],
-  propertyListingController.listProperty
-);
+  propertyListingController.listProperty);
+
+router.get('/properties', authMiddleware.isAuthenticated, propertyListingController.getAllProperties);
+
+router.get('/my-properties', authMiddleware.isAuthenticated, propertyListingController.myProperties);
+
+router.get('/property/:id', authMiddleware.isAuthenticated, propertyListingController.getPropertyById);
 
 module.exports = router;

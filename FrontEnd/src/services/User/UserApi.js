@@ -134,5 +134,44 @@ export const listProperty = async (formData) => {
   }
 };
 
+export const getAllProperties = async () => {
+  try {
+    const response = await api.get("/properties");
+    return response.data.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch properties. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const getMyProperties = async () => {
+  try {
+    const response = await api.get("/my-properties");
+    return response.data.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch properties. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const getPropertyById = async (id) => {
+  try {
+    const response = await api.get(`/property/${id}`);
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch property. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
 
 
