@@ -163,7 +163,8 @@ export const getMyProperties = async () => {
 export const getPropertyById = async (id) => {
   try {
     const response = await api.get(`/property/${id}`);
-    return response.data;
+    console.log(response.data.data);
+    return response.data.data;
   } catch (error) {
     const errorMessage =
       error.response?.data?.message ||

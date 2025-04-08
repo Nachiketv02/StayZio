@@ -300,7 +300,7 @@ function Properties() {
                         </div>
                       )}
                     </div>
-                    <Link to={`/properties/${property.id}`}>
+                    <Link to={`/properties/${property._id}`}>
                       <motion.button
                         className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-3 rounded-lg font-medium"
                         whileHover={{ scale: 1.02 }}

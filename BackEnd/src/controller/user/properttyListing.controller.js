@@ -105,7 +105,7 @@ module.exports.myProperties = async (req, res) => {
 
 module.exports.getPropertyById = async (req, res) => {
   try {
-    const property = await propertyListingModel.findById(req.params.id);
+    const property = await propertyListingModel.findById(req.params.id).populate('userId');
     if (!property) {
       return res.status(404).json({
         success: false,

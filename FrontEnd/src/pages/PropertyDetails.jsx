@@ -1,65 +1,63 @@
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { FaBed, FaBath, FaWifi, FaParking, FaSwimmingPool, FaTv, FaUtensils, FaDog, FaCalendarAlt, FaStar, FaUser, FaMapMarkerAlt } from 'react-icons/fa'
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  FaBed,
+  FaBath,
+  FaWifi,
+  FaParking,
+  FaSwimmingPool,
+  FaTv,
+  FaUtensils,
+  FaDog,
+  FaCalendarAlt,
+  FaStar,
+  FaUser,
+  FaMapMarkerAlt,
+  FaSnowflake,
+  FaDumbbell,
+  FaUmbrellaBeach,
+  FaWater,
+} from "react-icons/fa";
+import { getPropertyById } from "../services/User/UserApi";
+
+// Map amenity names to their corresponding icons
+const amenityIcons = {
+  'WiFi': FaWifi,
+  'Parking': FaParking,
+  'Swimming Pool': FaSwimmingPool,
+  'TV': FaTv,
+  'Kitchen': FaUtensils,
+  'Pet Friendly': FaDog,
+  'Air Conditioning': FaSnowflake,
+};
 
 function PropertyDetails() {
-  const { id } = useParams()
-  const [selectedImage, setSelectedImage] = useState(0)
+  const { id } = useParams();
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [property, setProperty] = useState(null);
 
-  // This would typically come from an API call using the id
-  const property = {
-    id: 1,
-    title: "Luxury Beachfront Villa",
-    description: "Experience luxury living in this stunning beachfront villa. Wake up to panoramic ocean views and enjoy direct beach access. This modern villa features high-end finishes, an infinity pool, and spacious living areas perfect for families or groups.",
-    location: "Bali, Indonesia",
-    price: 3500,
-    images: [
-      "https://images.unsplash.com/photo-1582610116397-edb318620f90?auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80"
-    ],
-    rating: 4.9,
-    reviewsCount: 128,
-    beds: 4,
-    baths: 3,
-    maxGuests: 8,
-    amenities: [
-      { name: "WiFi", icon: FaWifi },
-      { name: "Parking", icon: FaParking },
-      { name: "Swimming Pool", icon: FaSwimmingPool },
-      { name: "Smart TV", icon: FaTv },
-      { name: "Kitchen", icon: FaUtensils },
-      { name: "Pet Friendly", icon: FaDog }
-    ],
-    host: {
-      name: "Sarah Johnson",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80",
-      rating: 4.8,
-      responseRate: 98,
-      responseTime: "within an hour",
-      joined: "January 2020"
-    },
-    reviews: [
-      {
-        id: 1,
-        user: "John Doe",
-        avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80",
-        rating: 5,
-        date: "October 2023",
-        comment: "Amazing property with stunning views. The host was very accommodating and the amenities were top-notch."
-      },
-      {
-        id: 2,
-        user: "Emma Wilson",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80",
-        rating: 4.5,
-        date: "September 2023",
-        comment: "Beautiful villa with great attention to detail. The beach access was perfect and the pool was amazing."
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        const propertyData = await getPropertyById(id);
+        setProperty(propertyData);
+      } catch (error) {
+        console.error("Error fetching property:", error);
       }
-    ]
+    };
+    fetchProperty();
+  }, [id]);
+
+  if (!property) {
+    return <div className="min-h-screen pt-20 bg-gray-50 flex items-center justify-center">Loading...</div>;
   }
+
+  // Transform amenities array to include icons
+  const amenitiesWithIcons = property.amenities?.map(amenity => ({
+    name: amenity,
+    icon: amenityIcons[amenity] || FaWifi // Default to WiFi icon if not found
+  })) || [];
 
   return (
     <div className="min-h-screen pt-20 bg-gray-50">
@@ -72,17 +70,17 @@ function PropertyDetails() {
             animate={{ opacity: 1, y: 0 }}
           >
             <img
-              src={property.images[selectedImage]}
+              src={property.images?.[selectedImage]?.url || 'https://via.placeholder.com/800x600'}
               alt={property.title}
               className="absolute w-full h-full object-cover"
             />
           </motion.div>
           <div className="grid grid-cols-2 gap-4">
-            {property.images.map((image, index) => (
+            {property.images?.map((image, index) => (
               <motion.div
                 key={index}
                 className={`relative aspect-w-16 aspect-h-9 rounded-xl overflow-hidden cursor-pointer ${
-                  selectedImage === index ? 'ring-4 ring-primary-500' : ''
+                  selectedImage === index ? "ring-4 ring-primary-500" : ""
                 }`}
                 onClick={() => setSelectedImage(index)}
                 initial={{ opacity: 0, y: 20 }}
@@ -91,7 +89,7 @@ function PropertyDetails() {
                 whileHover={{ scale: 1.02 }}
               >
                 <img
-                  src={image}
+                  src={image.url || 'https://via.placeholder.com/400x300'}
                   alt={`${property.title} ${index + 1}`}
                   className="absolute w-full h-full object-cover"
                 />
@@ -119,8 +117,8 @@ function PropertyDetails() {
                 </div>
                 <div className="flex items-center">
                   <FaStar className="text-yellow-400 mr-1" />
-                  <span>{property.rating}</span>
-                  <span className="ml-1">({property.reviews.length} reviews)</span>
+                  <span>4.9</span>
+                  <span className="ml-1">(128 reviews)</span>
                 </div>
               </div>
             </div>
@@ -134,15 +132,17 @@ function PropertyDetails() {
             >
               <div className="text-center">
                 <FaBed className="w-6 h-6 mx-auto mb-2 text-primary-500" />
-                <p className="text-gray-600">{property.beds} Bedrooms</p>
+                <p className="text-gray-600">{property.bedrooms} Bedrooms</p>
               </div>
               <div className="text-center">
                 <FaBath className="w-6 h-6 mx-auto mb-2 text-primary-500" />
-                <p className="text-gray-600">{property.baths} Bathrooms</p>
+                <p className="text-gray-600">{property.bathrooms} Bathrooms</p>
               </div>
               <div className="text-center">
                 <FaUser className="w-6 h-6 mx-auto mb-2 text-primary-500" />
-                <p className="text-gray-600">Up to {property.maxGuests} guests</p>
+                <p className="text-gray-600">
+                  Up to {property.bedrooms * 2} guests
+                </p>
               </div>
             </motion.div>
 
@@ -163,46 +163,17 @@ function PropertyDetails() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <h2 className="text-2xl font-semibold mb-4">What this place offers</h2>
+              <h2 className="text-2xl font-semibold mb-4">
+                What this place offers
+              </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {property.amenities.map(({ name, icon: Icon }) => (
-                  <div key={name} className="flex items-center p-4 bg-white rounded-xl shadow-sm">
+                {amenitiesWithIcons.map(({ name, icon: Icon }) => (
+                  <div
+                    key={name}
+                    className="flex items-center p-4 bg-white rounded-xl shadow-sm"
+                  >
                     <Icon className="w-5 h-5 text-primary-500 mr-3" />
                     <span className="text-gray-600">{name}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Reviews */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
-              <div className="space-y-6">
-                {property.reviews.map(review => (
-                  <div key={review.id} className="bg-white p-6 rounded-xl shadow-sm">
-                    <div className="flex items-center mb-4">
-                      <img
-                        src={review.avatar}
-                        alt={review.user}
-                        className="w-12 h-12 rounded-full mr-4"
-                      />
-                      <div>
-                        <h3 className="font-medium">{review.user}</h3>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <span>{review.date}</span>
-                          <span className="mx-2">•</span>
-                          <div className="flex items-center">
-                            <FaStar className="text-yellow-400 mr-1" />
-                            <span>{review.rating}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-gray-600">{review.comment}</p>
                   </div>
                 ))}
               </div>
@@ -245,14 +216,11 @@ function PropertyDetails() {
                   <div className="relative">
                     <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <select className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                      <option>1 guest</option>
-                      <option>2 guests</option>
-                      <option>3 guests</option>
-                      <option>4 guests</option>
-                      <option>5 guests</option>
-                      <option>6 guests</option>
-                      <option>7 guests</option>
-                      <option>8 guests</option>
+                      {[...Array(8)].map((_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          {i + 1} {i === 0 ? 'guest' : 'guests'}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -270,23 +238,25 @@ function PropertyDetails() {
               {/* Host Info */}
               <div className="mt-8 pt-8 border-t">
                 <div className="flex items-center mb-4">
-                  <img
-                    src={property.host.image}
-                    alt={property.host.name}
-                    className="w-12 h-12 rounded-full mr-4"
-                  />
+                  <div className="w-12 h-12 rounded-full bg-gray-300 mr-4 flex items-center justify-center">
+                    <FaUser className="text-gray-500" />
+                  </div>
                   <div>
-                    <h3 className="font-medium">Hosted by {property.host.name}</h3>
-                    <p className="text-sm text-gray-500">Joined in {property.host.joined}</p>
+                    <h3 className="font-medium">
+                      Hosted by {property.userId?.fullName || 'Host'}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Joined in {new Date(property.createdAt).toLocaleDateString('default', { month: 'long', year: 'numeric' })}
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center">
                     <FaStar className="text-yellow-400 mr-2" />
-                    <span>{property.host.rating} Rating</span>
+                    <span>4.8 Rating</span>
                   </div>
-                  <p>{property.host.responseRate}% response rate</p>
-                  <p>Responds {property.host.responseTime}</p>
+                  <p>98% response rate</p>
+                  <p>Responds within an hour</p>
                 </div>
               </div>
             </motion.div>
@@ -294,7 +264,7 @@ function PropertyDetails() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default PropertyDetails
+export default PropertyDetails;
