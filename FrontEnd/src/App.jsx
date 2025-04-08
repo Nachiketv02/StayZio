@@ -16,6 +16,8 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Destinations from './pages/Destinations'
 import Experiences from './pages/Experiences'
+import MyProperties from './pages/MyProperties'
+import Favorites from './pages/Favorites'
 import { Toaster } from 'react-hot-toast'
 
 function PublicLayout() {
@@ -40,6 +42,8 @@ function PublicLayout() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/my-properties" element={<MyProperties />} />
+        <Route path="/favorites" element={<Favorites />} />
       </Routes>
       <Footer />
     </>

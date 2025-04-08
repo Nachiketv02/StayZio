@@ -5,7 +5,6 @@ import { FaSearch, FaBed, FaBath, FaWifi, FaParking, FaSwimmingPool, FaHeart } f
 import useFavoriteStore from '../store/favoriteStore'
 import toast from 'react-hot-toast'
 
-
 function Properties() {
   const [filters, setFilters] = useState({
     location: '',
@@ -69,7 +68,7 @@ function Properties() {
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
       {/* Search and Filters */}
-      <div className="bg-white shadow-lg py-6 sticky top-[74px] z-30">
+      <div className="bg-white shadow-lg py-6 sticky top-20 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
@@ -109,53 +108,6 @@ function Properties() {
           </div>
         </div>
       </div>
-
-      {/* Favorites Section */}
-      {favorites.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h2 className="text-2xl font-bold mb-6">Your Favorites</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {favorites.map((property) => (
-              <motion.div
-                key={property.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-              >
-                <div className="relative aspect-w-16 aspect-h-9">
-                  <img
-                    src={property.image}
-                    alt={property.title}
-                    className="absolute w-full h-full object-cover"
-                  />
-                  <motion.button
-                    className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleFavoriteClick(property)}
-                  >
-                    <FaHeart className="w-5 h-5 text-red-500" />
-                  </motion.button>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{property.title}</h3>
-                  <p className="text-gray-600 mb-4">{property.location}</p>
-                  <Link to={`/properties/${property.id}`}>
-                    <motion.button
-                      className="w-full bg-primary-600 text-white py-2 rounded-lg"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      View Details
-                    </motion.button>
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Properties Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

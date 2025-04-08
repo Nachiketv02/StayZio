@@ -100,4 +100,37 @@ export const resetPassword = async (password, confirmPassword, token) => {
   }
 };
 
+// Property Listing
+
+export const listProperty = async (formData) => {
+  try {
+    const response = await api.post("/list-property", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log(response);
+    if (!response.data) {
+      throw new Error("Invalid response from server");
+    }
+    return response.data;
+  } catch (error) {
+    let errorMessage = "Failed to list property. Please try again.";
+    if (error.response) {
+      if (error.response.data?.errors) {
+        errorMessage = error.response.data.errors
+          .map(err => err.msg)
+          .join(', ');
+      } 
+      else if (error.response.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    throw new Error(errorMessage);
+  }
+};
+
+
 

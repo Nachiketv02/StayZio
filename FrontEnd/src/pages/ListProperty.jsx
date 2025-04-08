@@ -21,16 +21,27 @@ import {
   FaWarehouse,
   FaHotel,
   FaCity,
-  FaFlag
+  FaFlag,
+  FaCheckCircle,
+  FaTimesCircle,
 } from "react-icons/fa";
+import { listProperty } from "../services/User/UserApi";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import confetti from "canvas-confetti";
 
 function ListProperty() {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     type: "",
     location: "",
+    country: "",
     price: "",
     bedrooms: "",
     bathrooms: "",
@@ -101,9 +112,37 @@ function ListProperty() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
+
+    // Validate file types and sizes
+    const validFiles = files.filter((file) => {
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!validTypes.includes(file.type)) {
+        toast.error(
+          `Invalid file type: ${file.name}. Only JPG, JPEG, PNG allowed.`
+        );
+        return false;
+      }
+
+      if (file.size > maxSize) {
+        toast.error(`File too large: ${file.name}. Max 5MB allowed.`);
+        return false;
+      }
+
+      return true;
+    });
+
     setFormData((prev) => ({
       ...prev,
-      images: [...prev.images, ...files],
+      images: [...prev.images, ...validFiles],
+    }));
+  };
+
+  const removeImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
     }));
   };
 
@@ -118,6 +157,7 @@ function ListProperty() {
     } else if (step === 2) {
       if (!formData.location.trim())
         newErrors.location = "Location is required";
+      if (!formData.country.trim()) newErrors.country = "Country is required";
       if (!formData.price || isNaN(formData.price))
         newErrors.price = "Valid price is required";
       if (!formData.bedrooms || isNaN(formData.bedrooms))
@@ -135,6 +175,12 @@ function ListProperty() {
       setCurrentStep((prev) => prev + 1);
     } else {
       setErrors(newErrors);
+      // Scroll to first error
+      const firstError = Object.keys(newErrors)[0];
+      document.getElementsByName(firstError)[0]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   };
 
@@ -142,15 +188,105 @@ function ListProperty() {
     setCurrentStep((prev) => prev - 1);
   };
 
-  const handleSubmit = (e) => {
+  const triggerConfetti = () => {
+    const count = 200;
+    const defaults = {
+      origin: { y: 0.7 },
+    };
+
+    function fire(particleRatio, opts) {
+      confetti({
+        ...defaults,
+        ...opts,
+        particleCount: Math.floor(count * particleRatio),
+      });
+    }
+
+    fire(0.25, {
+      spread: 26,
+      startVelocity: 55,
+    });
+
+    fire(0.2, {
+      spread: 60,
+    });
+
+    fire(0.35, {
+      spread: 100,
+      decay: 0.91,
+      scalar: 0.8,
+    });
+
+    fire(0.1, {
+      spread: 120,
+      startVelocity: 25,
+      decay: 0.92,
+      scalar: 1.2,
+    });
+
+    fire(0.1, {
+      spread: 120,
+      startVelocity: 45,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateStep(currentStep);
-
-    if (Object.keys(newErrors).length === 0) {
-      console.log("Form submitted:", formData);
-      // Here you would typically send the data to your backend
-    } else {
-      setErrors(newErrors);
+    setErrors(newErrors);
+  
+    if (Object.keys(newErrors).length > 0) {
+      const firstError = Object.keys(newErrors)[0];
+      document.getElementsByName(firstError)[0]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      return;
+    }
+  
+    if (formData.images.length === 0) {
+      toast.error("Please upload at least one image");
+      return;
+    }
+  
+    setIsSubmitting(true);
+    setShowError(false);
+    setShowSuccess(false);
+  
+    try {
+      const formDataToSend = new FormData();
+  
+      Object.keys(formData).forEach((key) => {
+        if (key !== "images" && key !== "amenities" && !Array.isArray(formData[key])) {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
+  
+      formData.amenities.forEach(amenity => {
+        formDataToSend.append('amenities[]', amenity);
+      });
+  
+      formData.images.forEach((image) => {
+        formDataToSend.append("images", image);
+      });
+  
+      const response = await listProperty(formDataToSend);
+  
+      if (response && response.success) {
+        setShowSuccess(true);
+        triggerConfetti();
+        setTimeout(() => {
+          navigate("/my-properties", { replace: true });
+        }, 3000);
+      } else {
+        throw new Error(response?.message || "Property listing failed");
+      }
+    } catch (error) {
+      console.error("Error listing property:", error);
+      setShowError(true);
+      toast.error(error.message || "Failed to list property");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -163,6 +299,80 @@ function ListProperty() {
 
   return (
     <div className="min-h-screen pt-20 bg-gradient-to-br from-gray-50 to-primary-50">
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md mx-4"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+                className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <FaCheckCircle className="w-12 h-12 text-green-500" />
+              </motion.div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Property Listed Successfully!
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Your property has been listed and will be visible to potential
+                guests soon.
+              </p>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-sm text-gray-500"
+              >
+                Redirecting to your properties...
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showError && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md mx-4"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+                className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <FaTimesCircle className="w-12 h-12 text-red-500" />
+              </motion.div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Oops! Something went wrong
+              </h3>
+              <p className="text-gray-600 mb-6">
+                We couldn't list your property at the moment. Please try again.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -402,6 +612,7 @@ function ListProperty() {
                             errors.price ? "border-red-300" : "border-gray-300"
                           } pl-12 pr-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
                           placeholder="1500"
+                          min="1"
                         />
                       </div>
                       {errors.price && (
@@ -432,6 +643,7 @@ function ListProperty() {
                               : "border-gray-300"
                           } pl-12 pr-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
                           placeholder="2"
+                          min="0"
                         />
                       </div>
                       {errors.bedrooms && (
@@ -462,6 +674,7 @@ function ListProperty() {
                               : "border-gray-300"
                           } pl-12 pr-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:ring-opacity-50 transition-all duration-200`}
                           placeholder="2"
+                          min="0"
                         />
                       </div>
                       {errors.bathrooms && (
@@ -573,7 +786,7 @@ function ListProperty() {
                         {formData.images.map((image, index) => (
                           <motion.div
                             key={index}
-                            className="relative aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-lg"
+                            className="relative aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-lg group"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: index * 0.1 }}
@@ -583,6 +796,24 @@ function ListProperty() {
                               alt={`Property ${index + 1}`}
                               className="object-cover w-full h-full rounded-xl"
                             />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
                           </motion.div>
                         ))}
                       </motion.div>
@@ -601,6 +832,7 @@ function ListProperty() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all duration-200"
+                  disabled={isSubmitting}
                 >
                   Previous
                 </motion.button>
@@ -612,9 +844,40 @@ function ListProperty() {
                 }
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 ml-auto"
+                disabled={isSubmitting}
+                className={`px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 ml-auto ${
+                  isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                }`}
               >
-                {currentStep === steps.length ? "List Property" : "Next"}
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : currentStep === steps.length ? (
+                  "List Property"
+                ) : (
+                  "Next"
+                )}
               </motion.button>
             </div>
           </form>

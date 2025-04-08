@@ -37,22 +37,23 @@ router.post('/logout', authMiddleware.isAuthenticated, userController.logoutUser
 
 // Property Listing Routes
 
+// Update the property listing route
 router.post(
-    '/list-property',
-    upload.array('images', 10), // ✅ must come first to parse multipart/form-data
-    [
-      body('title').trim().notEmpty().withMessage("Title is required"),
-      body('description').trim().notEmpty().withMessage("Description is required"),
-      body('type').trim().notEmpty().withMessage("Type is required"),
-      body('location').trim().notEmpty().withMessage("Location is required"),
-      body('country').trim().notEmpty().withMessage("Country is required"),
-      body('price').trim().notEmpty().withMessage("Price is required"),
-      body('bedrooms').trim().notEmpty().withMessage("Bedrooms is required"),
-      body('bathrooms').trim().notEmpty().withMessage("Bathrooms is required"),
-      body('amenities').isArray().withMessage("Amenities must be an array"),
-    ],
-    authMiddleware.isAuthenticated,
-    propertyListingController.listProperty
-  );
+  '/list-property',
+  authMiddleware.isAuthenticated,
+  upload.array('images', 10),
+  [
+    body('title').trim().notEmpty().withMessage("Title is required"),
+    body('description').trim().notEmpty().withMessage("Description is required"),
+    body('type').trim().notEmpty().withMessage("Type is required"),
+    body('location').trim().notEmpty().withMessage("Location is required"),
+    body('country').trim().notEmpty().withMessage("Country is required"),
+    body('price').isNumeric().withMessage("Price must be a number"),
+    body('bedrooms').isInt({ min: 0 }).withMessage("Bedrooms must be a positive integer"),
+    body('bathrooms').isInt({ min: 0 }).withMessage("Bathrooms must be a positive integer"),
+    body('amenities').optional().isArray().withMessage("Amenities must be an array"),
+  ],
+  propertyListingController.listProperty
+);
 
 module.exports = router;
