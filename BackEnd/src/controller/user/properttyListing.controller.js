@@ -133,30 +133,40 @@ module.exports.updateProperty = async (req, res) => {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const existingImages = req.body.existingImages || [];
+    // Get the current property first
+    const currentProperty = await propertyListingModel.findById(req.params.id);
+    if (!currentProperty) {
+      return res.status(404).json({ message: "Property not found" });
+    }
 
-    const newImages = req.files.map(file => ({
-      public_id: file.filename,
-      url: file.path,
-    }));
+    // Prepare update data
+    const updateData = { ...req.body };
 
-    const allImages = [...existingImages, ...newImages];
+    // Handle images:
+    // If new files are uploaded, combine with existing
+    // If no new files, keep existing images
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map(file => ({
+        public_id: file.filename,
+        url: file.path,
+      }));
+      
+      // Check if existingImages were sent from frontend
+      const existingImages = req.body.existingImages 
+        ? JSON.parse(req.body.existingImages)
+        : currentProperty.images;
+
+      updateData.images = [...existingImages, ...newImages];
+    } else {
+      // No new images uploaded - keep existing ones
+      updateData.images = currentProperty.images;
+    }
 
     const updatedProperty = await propertyListingModel.findByIdAndUpdate(
       req.params.id,
-      {
-        ...req.body,
-        images: allImages,
-      },
+      updateData,
       { new: true }
     );
-
-    if (!updatedProperty) {
-      return res.status(404).json({
-        success: false,
-        message: "Property not found",
-      });
-    }
 
     return res.status(200).json({
       success: true,

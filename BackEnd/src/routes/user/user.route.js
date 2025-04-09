@@ -61,7 +61,7 @@ router.get('/my-properties', authMiddleware.isAuthenticated, propertyListingCont
 
 router.get('/property/:id', authMiddleware.isAuthenticated, propertyListingController.getPropertyById);
 
-router.put('/property/:id', upload.array('newImages', 10), [
+router.put('/property/:id', upload.array('images', 10), [
     body('title').trim().notEmpty().withMessage("Title is required"),
     body('description').trim().notEmpty().withMessage("Description is required"),
     body('type').trim().notEmpty().withMessage("Type is required"),

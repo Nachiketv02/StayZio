@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const connectDB = require("./db/db");
 const userRoute = require("./routes/user/user.route");
+const propertyListingModel = require("./model/user/propertyListing.model");
 
 connectDB();
 
@@ -26,3 +27,4 @@ app.get("/", (req, res) => {
 });
 
 module.exports = app;
+

@@ -26,7 +26,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaSpinner,
-  FaTimes
+  FaTimes,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { UserDataContext } from "../context/UserContex";
@@ -191,7 +191,6 @@ function EditProperty() {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.description.trim())
       newErrors.description = "Description is required";
@@ -204,15 +203,15 @@ function EditProperty() {
       newErrors.bedrooms = "Number of bedrooms is required";
     if (!formData.bathrooms || isNaN(formData.bathrooms))
       newErrors.bathrooms = "Number of bathrooms is required";
-
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form fields first
     const newErrors = validateForm();
     setErrors(newErrors);
-
     if (Object.keys(newErrors).length > 0) {
       const firstError = Object.keys(newErrors)[0];
       document.getElementsByName(firstError)[0]?.scrollIntoView({
@@ -228,34 +227,52 @@ function EditProperty() {
 
     try {
       const formDataToSend = new FormData();
+      console.log('Form data before submit:', formData);
 
+
+
+      // 1. Append all non-image fields
       Object.keys(formData).forEach((key) => {
-        if (key !== "existingImages" && key !== "newImages" && key !== "amenities" && !Array.isArray(formData[key])) {
+        if (
+          key !== "existingImages" &&
+          key !== "newImages" &&
+          key !== "amenities"
+        ) {
           formDataToSend.append(key, formData[key]);
         }
       });
-  
-      formData.amenities.forEach(amenity => {
-        formDataToSend.append('amenities[]', amenity);
-      });
-  
-      formData.existingImages.forEach((image) => {
-        formDataToSend.append('existingImages[]', image.url);
-      });
-  
-      formData.newImages.forEach((image) => {
-        formDataToSend.append('newImages', image);
+
+      // 2. Append amenities
+      formData.amenities.forEach((amenity) => {
+        formDataToSend.append("amenities[]", amenity);
       });
 
+      // 3. Handle images:
+      // - Always send existing images (even if unchanged)
+      formDataToSend.append(
+        "existingImages",
+        JSON.stringify(formData.existingImages)
+      );
+
+      // - Append new images if any were added
+      formData.newImages.forEach((image) => {
+        formDataToSend.append("images", image); // Matches Multer's expected field name
+      });
+
+      // 4. Send the request
       const response = await updateProperty(id, formDataToSend);
-      navigate("/my-properties");
-      if (response && response.success) {
+      console.log("edit", response);
+      if (response) {
         setShowSuccess(true);
         toast.success("Property updated successfully!");
+        setTimeout(() => {
+          navigate("/my-properties");
+        }, 2000);
       } else {
         throw new Error(response?.message || "Failed to update property");
       }
     } catch (error) {
+      console.error("Error updating property:", error);
       setShowError(true);
       toast.error(error.message || "Failed to update property");
     } finally {
@@ -489,6 +506,7 @@ function EditProperty() {
                 )}
               </div>
 
+              {/* Bathrooms Input Field */}
               <div>
                 <label className="block text-lg font-medium text-gray-700 mb-2">
                   Bathrooms
@@ -506,16 +524,16 @@ function EditProperty() {
                     placeholder="2"
                     min="0"
                   />
+                  {errors.bathrooms && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-2 text-sm text-red-600"
+                    >
+                      {errors.bathrooms}
+                    </motion.p>
+                  )}
                 </div>
-                {errors.bathrooms && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-2 text-sm text-red-600"
-                  >
-                    {errors.bathrooms}
-                  </motion.p>
-                )}
               </div>
             </div>
 

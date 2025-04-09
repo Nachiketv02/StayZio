@@ -24,7 +24,7 @@ import {
   FaUmbrellaBeach,
   FaSpinner,
 } from 'react-icons/fa';
-import { getMyProperties } from '../services/User/UserApi';
+import { getMyProperties , deleteProperty } from '../services/User/UserApi';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -73,27 +73,23 @@ function MyProperties() {
     }
   });
 
-  // const handleDelete = (property) => {
-  //   setPropertyToDelete(property);
-  //   setShowDeleteModal(true);
-  // };
+  const handleDelete = (property) => {
+    setPropertyToDelete(property);
+    setShowDeleteModal(true);
+  };
 
-  // const confirmDelete = async () => {
-  //   setIsDeletingProperty(true);
-  //   try {
-  //     await deleteProperty(propertyToDelete._id);
-  //     setProperties(properties.filter(p => p._id !== propertyToDelete._id));
-  //     toast.success('Property deleted successfully');
-  //     setShowDeleteModal(false);
-  //   } catch (error) {
-  //     toast.error(error.message || 'Failed to delete property');
-  //   } finally {
-  //     setIsDeletingProperty(false);
-  //   }
-  // };
-
-  const handleEdit = (propertyId) => {
-    navigate(`/edit-property/${propertyId}`);
+  const confirmDelete = async () => {
+    setIsDeletingProperty(true);
+    try {
+      await deleteProperty(propertyToDelete._id);
+      setProperties(properties.filter(p => p._id !== propertyToDelete._id));
+      toast.success('Property deleted successfully');
+      setShowDeleteModal(false);
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete property');
+    } finally {
+      setIsDeletingProperty(false);
+    }
   };
 
   const handleView = (propertyId) => {
