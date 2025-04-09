@@ -126,3 +126,67 @@ module.exports.getPropertyById = async (req, res) => {
   }
 };
 
+module.exports.updateProperty = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const existingImages = req.body.existingImages || [];
+
+    const newImages = req.files.map(file => ({
+      public_id: file.filename,
+      url: file.path,
+    }));
+
+    const allImages = [...existingImages, ...newImages];
+
+    const updatedProperty = await propertyListingModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        images: allImages,
+      },
+      { new: true }
+    );
+
+    if (!updatedProperty) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: updatedProperty,
+    });
+  } catch (error) {
+    console.error("Error updating property:", error);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+module.exports.deleteProperty = async (req, res) => {
+  try {
+    const property = await propertyListingModel.findByIdAndDelete(req.params.id);
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Property deleted successfully",
+      data: property
+    });
+  } catch (error) {
+    console.error("Error in deleting property:", error.message);
+    return res.status(400).json({
+      success: false,
+      message: "Failed to delete property. Please try again.",
+    });
+  }
+};

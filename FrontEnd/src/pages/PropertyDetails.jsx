@@ -15,13 +15,9 @@ import {
   FaUser,
   FaMapMarkerAlt,
   FaSnowflake,
-  FaDumbbell,
-  FaUmbrellaBeach,
-  FaWater,
 } from "react-icons/fa";
 import { getPropertyById } from "../services/User/UserApi";
 
-// Map amenity names to their corresponding icons
 const amenityIcons = {
   'WiFi': FaWifi,
   'Parking': FaParking,
@@ -53,10 +49,9 @@ function PropertyDetails() {
     return <div className="min-h-screen pt-20 bg-gray-50 flex items-center justify-center">Loading...</div>;
   }
 
-  // Transform amenities array to include icons
   const amenitiesWithIcons = property.amenities?.map(amenity => ({
     name: amenity,
-    icon: amenityIcons[amenity] || FaWifi // Default to WiFi icon if not found
+    icon: amenityIcons[amenity] || FaWifi
   })) || [];
 
   return (
@@ -99,9 +94,7 @@ function PropertyDetails() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="md:col-span-2 space-y-8">
-            {/* Header */}
             <div>
               <motion.h1
                 className="text-4xl font-bold mb-4"
@@ -146,7 +139,6 @@ function PropertyDetails() {
               </div>
             </motion.div>
 
-            {/* Description */}
             <motion.div
               className="prose max-w-none"
               initial={{ opacity: 0, y: 20 }}
@@ -157,7 +149,6 @@ function PropertyDetails() {
               <p className="text-gray-600">{property.description}</p>
             </motion.div>
 
-            {/* Amenities */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -180,14 +171,12 @@ function PropertyDetails() {
             </motion.div>
           </div>
 
-          {/* Sidebar */}
           <div className="md:col-span-1">
             <motion.div
               className="sticky top-24 bg-white p-6 rounded-xl shadow-lg"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              {/* Price */}
               <div className="mb-6">
                 <span className="text-2xl font-bold">₹{property.price}</span>
                 <span className="text-gray-600"> / night</span>
@@ -266,5 +255,6 @@ function PropertyDetails() {
     </div>
   );
 }
+
 
 export default PropertyDetails;

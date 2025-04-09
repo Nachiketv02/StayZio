@@ -61,4 +61,18 @@ router.get('/my-properties', authMiddleware.isAuthenticated, propertyListingCont
 
 router.get('/property/:id', authMiddleware.isAuthenticated, propertyListingController.getPropertyById);
 
+router.put('/property/:id', upload.array('newImages', 10), [
+    body('title').trim().notEmpty().withMessage("Title is required"),
+    body('description').trim().notEmpty().withMessage("Description is required"),
+    body('type').trim().notEmpty().withMessage("Type is required"),
+    body('location').trim().notEmpty().withMessage("Location is required"),
+    body('country').trim().notEmpty().withMessage("Country is required"),
+    body('price').isNumeric().withMessage("Price must be a number"),
+    body('bedrooms').isInt({ min: 0 }).withMessage("Bedrooms must be a positive integer"),
+    body('bathrooms').isInt({ min: 0 }).withMessage("Bathrooms must be a positive integer"),
+    body('amenities').optional().isArray().withMessage("Amenities must be an array"),
+  ], authMiddleware.isAuthenticated, propertyListingController.updateProperty);
+
+router.delete('/property/:id', authMiddleware.isAuthenticated, propertyListingController.deleteProperty);
+
 module.exports = router;

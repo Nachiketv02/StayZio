@@ -174,5 +174,49 @@ export const getPropertyById = async (id) => {
   }
 };
 
+export const updateProperty = async (id, formData) => {
+  try {
+    const response = await api.put(`/property/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log(response.data.data);
+    if (!response.data) {
+      throw new Error("Invalid response from server");
+    }
+    return response.data.data;
+  } catch (error) {
+    let errorMessage = "Failed to update property. Please try again.";
+    if (error.response) {
+      if (error.response.data?.errors) {
+        errorMessage = error.response.data.errors
+          .map(err => err.msg)
+          .join(', ');
+      } 
+      else if (error.response.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    throw new Error(errorMessage);
+  }
+};
+
+export const deleteProperty = async (id) => {
+  try {
+    const response = await api.delete(`/property/${id}`);
+    return response;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to delete property. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+
 
 

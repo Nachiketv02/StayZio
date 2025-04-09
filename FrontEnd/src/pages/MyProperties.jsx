@@ -22,9 +22,11 @@ import {
   FaDumbbell,
   FaDog,
   FaUmbrellaBeach,
+  FaSpinner,
 } from 'react-icons/fa';
 import { getMyProperties } from '../services/User/UserApi';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function MyProperties() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,24 +35,25 @@ function MyProperties() {
   const [properties, setProperties] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
+  const [isDeletingProperty, setIsDeletingProperty] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const properties = await getMyProperties();
-        setProperties(properties);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchProperties();
   }, []);
+
+  const fetchProperties = async () => {
+    try {
+      const fetchedProperties = await getMyProperties();
+      setProperties(fetchedProperties);
+    } catch (error) {
+      toast.error(error.message || 'Failed to fetch properties');
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredProperties = properties.filter(property => {
     return property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -70,20 +73,31 @@ function MyProperties() {
     }
   });
 
-  const handleDelete = (property) => {
-    setPropertyToDelete(property);
-    setShowDeleteModal(true);
+  // const handleDelete = (property) => {
+  //   setPropertyToDelete(property);
+  //   setShowDeleteModal(true);
+  // };
+
+  // const confirmDelete = async () => {
+  //   setIsDeletingProperty(true);
+  //   try {
+  //     await deleteProperty(propertyToDelete._id);
+  //     setProperties(properties.filter(p => p._id !== propertyToDelete._id));
+  //     toast.success('Property deleted successfully');
+  //     setShowDeleteModal(false);
+  //   } catch (error) {
+  //     toast.error(error.message || 'Failed to delete property');
+  //   } finally {
+  //     setIsDeletingProperty(false);
+  //   }
+  // };
+
+  const handleEdit = (propertyId) => {
+    navigate(`/edit-property/${propertyId}`);
   };
 
-  const confirmDelete = async () => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setProperties(properties.filter(p => p.id !== propertyToDelete.id));
-      setShowDeleteModal(false);
-    } catch (error) {
-      console.error('Error deleting property:', error);
-    }
+  const handleView = (propertyId) => {
+    navigate(`/properties/${propertyId}`);
   };
 
   const AmenityIcon = ({ amenity }) => {
@@ -112,6 +126,23 @@ function MyProperties() {
         return null;
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchProperties}
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -175,6 +206,18 @@ function MyProperties() {
                 <div className="h-4 bg-gray-200 rounded w-1/2"></div>
               </div>
             ))}
+          </div>
+        ) : filteredProperties.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-medium text-gray-900 mb-2">No properties found</h3>
+            <p className="text-gray-600 mb-6">Start by adding your first property listing</p>
+            <Link
+              to="/list-property"
+              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            >
+              <FaPlus className="w-4 h-4 mr-2" />
+              Add Property
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -242,6 +285,7 @@ function MyProperties() {
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
+                          onClick={() => handleView(property._id)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                         >
                           <FaEye className="w-4 h-4" />
@@ -249,6 +293,7 @@ function MyProperties() {
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
+                          onClick={() => navigate(`/edit-property/${property._id}`)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                         >
                           <FaEdit className="w-4 h-4" />
@@ -296,7 +341,8 @@ function MyProperties() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setShowDeleteModal(false)}
-                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                    disabled={isDeletingProperty}
+                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                   >
                     Cancel
                   </motion.button>
@@ -304,9 +350,17 @@ function MyProperties() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={confirmDelete}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    disabled={isDeletingProperty}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center"
                   >
-                    Delete
+                    {isDeletingProperty ? (
+                      <>
+                        <FaSpinner className="animate-spin mr-2" />
+                        Deleting...
+                      </>
+                    ) : (
+                      'Delete'
+                    )}
                   </motion.button>
                 </div>
               </motion.div>

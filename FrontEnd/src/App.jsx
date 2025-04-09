@@ -19,6 +19,7 @@ import Experiences from './pages/Experiences'
 import MyProperties from './pages/MyProperties'
 import Favorites from './pages/Favorites'
 import ProtectedRoute from './context/ProtectedRoute';
+import EditProperty from './pages/EditProperty';
 import { Toaster } from 'react-hot-toast'
 
 function PublicLayout() {
@@ -43,8 +44,9 @@ function PublicLayout() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/my-properties" element={<MyProperties />} />
+        <Route path="/my-properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
         <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+        <Route path="/edit-property/:id" element={<ProtectedRoute><EditProperty /></ProtectedRoute>} />
       </Routes>
       <Footer />
     </>
