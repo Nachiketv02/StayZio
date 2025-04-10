@@ -5,7 +5,7 @@ const userController = require("../../controller/user/user.controller");
 const authMiddleware = require("../../middleware/auth.middleware");
 const propertyListingController = require("../../controller/user/properttyListing.controller");
 const upload = require("../../middleware/upload");
-
+const bookingController = require("../../controller/user/booking.controller");
 
 router.post('/register', [
     body('fullName').trim().isString().withMessage("Name must be a string"),
@@ -74,5 +74,13 @@ router.put('/property/:id', upload.array('images', 10), [
   ], authMiddleware.isAuthenticated, propertyListingController.updateProperty);
 
 router.delete('/property/:id', authMiddleware.isAuthenticated, propertyListingController.deleteProperty);
+
+// Booking Routes
+
+router.post('/book-property', authMiddleware.isAuthenticated, bookingController.createBooking);
+
+router.get('/my-bookings', authMiddleware.isAuthenticated, bookingController.getMyBookings);
+
+router.delete('/my-bookings/:id', authMiddleware.isAuthenticated, bookingController.deleteBooking);
 
 module.exports = router;
