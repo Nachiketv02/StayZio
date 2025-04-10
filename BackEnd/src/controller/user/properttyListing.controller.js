@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const propertyListingModel = require("../../model/user/propertyListing.model");
+const userModel = require("../../model/user/user.model");
 
 module.exports.listProperty = async (req, res) => {
   try {
@@ -50,6 +51,7 @@ module.exports.listProperty = async (req, res) => {
     });
 
     await property.save();
+    await userModel.findByIdAndUpdate(req.user._id, {isHost: true});
 
     return res.status(201).json({
       success: true,

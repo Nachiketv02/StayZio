@@ -41,9 +41,9 @@ export const login = async (formData) => {
   } catch (error) {
     console.error('Login error:', error);
     const errorMessage =
-      error.response?.data?.message 
-      // error.message ||
-      // "Login failed. Please try again.";
+      error.response?.data?.message ||
+      error.message ||
+      "Login failed. Please try again.";
     throw new Error(errorMessage);
   }
 };
