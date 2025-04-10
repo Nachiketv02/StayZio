@@ -17,6 +17,7 @@ import {
   FaSnowflake,
 } from "react-icons/fa";
 import { getPropertyById } from "../services/User/UserApi";
+import { useNavigate } from "react-router-dom";
 
 const amenityIcons = {
   'WiFi': FaWifi,
@@ -32,6 +33,8 @@ function PropertyDetails() {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
   const [property, setProperty] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -177,52 +180,20 @@ function PropertyDetails() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
             >
+              {/* Price */}
               <div className="mb-6">
                 <span className="text-2xl font-bold">₹{property.price}</span>
                 <span className="text-gray-600"> / night</span>
               </div>
 
-              {/* Booking Form */}
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Check-in / Check-out
-                  </label>
-                  <div className="relative">
-                    <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Add dates"
-                      className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Guests
-                  </label>
-                  <div className="relative">
-                    <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <select className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                      {[...Array(8)].map((_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          {i + 1} {i === 0 ? 'guest' : 'guests'}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <motion.button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-3 rounded-lg font-medium shadow-lg"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Reserve
-                </motion.button>
-              </form>
+              <motion.button
+                onClick={() => navigate(`/booking/${property._id}`, { state: { property } })}
+                className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-3 rounded-lg font-medium shadow-lg"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Reserve Now
+              </motion.button>
 
               {/* Host Info */}
               <div className="mt-8 pt-8 border-t">

@@ -20,6 +20,8 @@ import MyProperties from './pages/MyProperties'
 import Favorites from './pages/Favorites'
 import ProtectedRoute from './context/ProtectedRoute';
 import EditProperty from './pages/EditProperty';
+import Booking from './pages/Booking';
+import BookingConfirmation from './pages/BookingConfirmation';
 import { Toaster } from 'react-hot-toast'
 
 function PublicLayout() {
@@ -47,6 +49,8 @@ function PublicLayout() {
         <Route path="/my-properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
         <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
         <Route path="/edit-property/:id" element={<ProtectedRoute><EditProperty /></ProtectedRoute>} />
+        <Route path="/booking/:id" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
+        <Route path="/booking-confirmation/:id" element={<ProtectedRoute><BookingConfirmation /></ProtectedRoute>} />
       </Routes>
       <Footer />
     </>
