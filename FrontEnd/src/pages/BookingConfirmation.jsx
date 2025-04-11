@@ -72,7 +72,7 @@ function BookingConfirmation() {
               Booking Confirmed!
             </h1>
             <p className="text-gray-600">
-              Your reservation has been successfully confirmed. We've sent the details to your email.
+              Your reservation has been successfully confirmed.
             </p>
           </div>
 
@@ -80,7 +80,7 @@ function BookingConfirmation() {
           <div className="border-t border-b border-gray-200 py-6 mb-6">
             <div className="flex items-center">
               <img
-                src={property.image}
+                src={property.images?.[0]?.url}
                 alt={property.title}
                 className="w-24 h-24 rounded-lg object-cover mr-6"
               />

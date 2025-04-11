@@ -17,6 +17,10 @@ const bookingSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    totalAmount: {
+        type: Number,
+        required: true
+    },
     propertyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'propertyListing',

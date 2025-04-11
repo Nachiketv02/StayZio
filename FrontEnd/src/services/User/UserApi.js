@@ -216,6 +216,46 @@ export const deleteProperty = async (id) => {
   }
 };
 
+// Booking
+
+export const createBooking = async (formData) => {
+  try {
+    const response = await api.post("/book-property", formData);
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to create booking. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const getMyBookings = async () => {
+  try {
+    const response = await api.get("/my-bookings");
+    return response.data.bookings;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch bookings. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const deleteBooking = async (id) => {
+  try {
+    const response = await api.delete(`/my-bookings/${id}`);
+    return response;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to delete booking. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
 
 
 

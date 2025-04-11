@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FaCalendarAlt, FaUsers, FaCreditCard, FaLock, FaUser, FaEnvelope, FaPhone, FaSpinner } from 'react-icons/fa';
-import { getPropertyById } from '../services/User/UserApi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaCalendarAlt, FaUsers, FaCreditCard, FaLock, FaUser, FaEnvelope, FaPhone, FaSpinner, FaCheckCircle } from 'react-icons/fa';
+import { getPropertyById, createBooking } from '../services/User/UserApi';
 import { UserDataContext } from '../context/UserContex';
 
 function Booking() {
@@ -17,14 +17,46 @@ function Booking() {
   const [errors, setErrors] = useState({});
   const [property, setProperty] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [numberOfNights, setNumberOfNights] = useState(0);
   const { userData } = useContext(UserDataContext);
 
-  // Mock user data - replace with actual user context/data
-  const user = {
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+91 9876543210"
+  const handleBooking = async () => {
+    try {
+      setIsSubmitting(true);
+      const booking = await createBooking({
+        propertyId: id,
+        checkIn: bookingData.checkIn,
+        checkOut: bookingData.checkOut,
+        guests: bookingData.guests,
+        paymentMethod: bookingData.paymentMethod,
+        totalAmount: calculatePrices().total
+      });
+      
+      setShowSuccess(true);
+      
+      // Wait for 2 seconds to show success message before navigating
+      setTimeout(() => {
+        navigate(`/booking-confirmation/${booking.id}`, { 
+          state: { 
+            property,
+            bookingData,
+            numberOfNights,
+            prices: calculatePrices()
+          }
+        });
+      }, 2000);
+
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      setErrors(prev => ({
+        ...prev,
+        submit: 'Failed to create booking. Please try again.'
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -41,7 +73,6 @@ function Booking() {
     fetchProperty();
   }, [id]);
 
-  // Calculate number of nights whenever dates change
   useEffect(() => {
     if (bookingData.checkIn && bookingData.checkOut) {
       const checkIn = new Date(bookingData.checkIn);
@@ -76,7 +107,6 @@ function Booking() {
       [name]: value
     }));
 
-    // Clear error when field is changed
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -84,7 +114,6 @@ function Booking() {
       }));
     }
 
-    // Additional validation for check-out date
     if (name === 'checkIn' && bookingData.checkOut) {
       if (new Date(value) >= new Date(bookingData.checkOut)) {
         setBookingData(prev => ({
@@ -120,20 +149,12 @@ function Booking() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
     
     if (Object.keys(newErrors).length === 0) {
-      const prices = calculatePrices();
-      navigate(`/booking-confirmation/${id}`, { 
-        state: { 
-          property,
-          bookingData,
-          numberOfNights,
-          prices
-        }
-      });
+      await handleBooking();
     } else {
       setErrors(newErrors);
     }
@@ -176,6 +197,22 @@ function Booking() {
 
   return (
     <div className="min-h-screen pt-20 bg-gray-50">
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -100 }}
+            className="fixed top-0 left-0 right-0 z-50 bg-green-500 text-white p-4"
+          >
+            <div className="max-w-4xl mx-auto flex items-center justify-center space-x-3">
+              <FaCheckCircle className="w-6 h-6" />
+              <p className="text-lg font-medium">Booking confirmed successfully! Redirecting...</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -343,6 +380,12 @@ function Booking() {
               </div>
             </div>
 
+            {errors.submit && (
+              <div className="text-red-600 text-sm mt-4">
+                {errors.submit}
+              </div>
+            )}
+
             <div className="flex items-center text-sm text-gray-500 mt-6">
               <FaLock className="w-4 h-4 mr-2" />
               <span>Your payment information is encrypted and secure</span>
@@ -350,11 +393,21 @@ function Booking() {
 
             <motion.button
               type="submit"
-              className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-4 rounded-xl font-medium shadow-lg"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              disabled={isSubmitting}
+              className={`w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-4 rounded-xl font-medium shadow-lg ${
+                isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+              }`}
+              whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+              whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
             >
-              Confirm Booking
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <FaSpinner className="animate-spin mr-2" />
+                  Processing...
+                </div>
+              ) : (
+                'Confirm Booking'
+              )}
             </motion.button>
           </form>
         </motion.div>

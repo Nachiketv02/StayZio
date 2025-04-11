@@ -5,7 +5,7 @@ const bookingModel = require("../../model/user/booking.model");
 
 module.exports.createBooking = async (req, res) => {
   try {
-    const { checkIn, checkOut, guests, paymentMethod, propertyId } = req.body;
+    const { checkIn, checkOut, guests, paymentMethod, propertyId, totalAmount } = req.body;
 
     if (!checkIn || !checkOut || !guests || !paymentMethod || !propertyId) {
       return res.status(400).json({ message: "All fields are required" });
@@ -43,6 +43,7 @@ module.exports.createBooking = async (req, res) => {
       checkOut,
       guests,
       paymentMethod,
+      totalAmount,
       propertyId,
       userId: user._id,
     });
@@ -58,7 +59,7 @@ module.exports.createBooking = async (req, res) => {
 
 module.exports.getMyBookings = async (req, res) => {
   try {
-    const bookings = await bookingModel.find({ userId: req.user._id });
+    const bookings = await bookingModel.find({ userId: req.user._id }).populate('propertyId');
     res.status(200).json({ bookings });
   } catch (error) {
     console.error("Error in getMyBookings controller:", error.message);
@@ -69,7 +70,6 @@ module.exports.getMyBookings = async (req, res) => {
 module.exports.deleteBooking = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
     const booking = await bookingModel.findById(id);
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });

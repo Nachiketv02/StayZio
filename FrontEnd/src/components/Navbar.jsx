@@ -8,6 +8,7 @@ import {
   FaChevronDown,
   FaHeart,
   FaHome,
+  FaCalendarAlt
 } from "react-icons/fa";
 import { UserDataContext } from "../context/UserContex";
 import { logout } from "../services/User/UserApi";
@@ -71,6 +72,11 @@ function Navbar() {
 
   const handleMyProperties = () => {
     navigate("/my-properties");
+    setIsProfileOpen(false);
+  };
+
+  const handleMyBookings = () => {
+    navigate("/my-bookings");
     setIsProfileOpen(false);
   };
 
@@ -206,6 +212,14 @@ function Navbar() {
                         >
                           <FaHome className="w-4 h-4 mr-2" />
                           My Properties
+                        </motion.button>
+                        <motion.button
+                          className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          onClick={handleMyBookings}
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <FaCalendarAlt className="w-4 h-4 mr-2" />
+                          Your Bookings
                         </motion.button>
                         <motion.button
                           className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
@@ -358,6 +372,22 @@ function Navbar() {
                   >
                     <FaUserCircle className="w-5 h-5" />
                     <span>Profile</span>
+                  </motion.button>
+                  <motion.button
+                    className="w-full flex items-center justify-center space-x-2 text-blue-600 border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-medium transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    onClick={handleMyProperties}
+                  >
+                    <FaHome className="w-5 h-5" />
+                    <span>My Properties</span>
+                  </motion.button>
+                  <motion.button
+                    className="w-full flex items-center justify-center space-x-2 text-blue-600 border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-medium transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    onClick={handleMyBookings}
+                  >
+                    <FaCalendarAlt className="w-5 h-5" />
+                    <span>My Bookings</span>
                   </motion.button>
                   <motion.button
                     className="w-full flex items-center justify-center space-x-2 text-red-600 border-2 border-red-200 bg-red-50 hover:bg-red-100 px-6 py-3 rounded-full font-medium transition-colors"
