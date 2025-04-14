@@ -6,6 +6,7 @@ const authMiddleware = require("../../middleware/auth.middleware");
 const propertyListingController = require("../../controller/user/properttyListing.controller");
 const upload = require("../../middleware/upload");
 const bookingController = require("../../controller/user/booking.controller");
+const reviewController = require("../../controller/user/review.controller");
 
 router.post('/register', [
     body('fullName').trim().isString().withMessage("Name must be a string"),
@@ -84,5 +85,20 @@ router.get('/my-bookings', authMiddleware.isAuthenticated, bookingController.get
 router.delete('/my-bookings/:id', authMiddleware.isAuthenticated, bookingController.deleteBooking);
 
 router.get('/property/:id/bookings', authMiddleware.isAuthenticated, bookingController.getPropertyBookings);
+
+// Review Routes
+
+router.post('/review', [
+  body('propertyId').isMongoId().withMessage("Invalid property ID"),
+  body('bookingId').isMongoId().withMessage("Invalid booking ID"),
+  body('rating').isInt({ min: 1, max: 5 }).withMessage("Rating must be between 1 and 5"),
+  body('comment').trim().isLength({ min: 10, max: 500 }).withMessage("Comment must be between 10-500 characters")
+], authMiddleware.isAuthenticated, reviewController.createReview);
+
+router.get('/reviews', authMiddleware.isAuthenticated, reviewController.getMyReviews);
+
+router.get('/property/:propertyId/reviews', authMiddleware.isAuthenticated, reviewController.getPropertyReviews);
+
+router.delete('/review/:reviewId', authMiddleware.isAuthenticated, reviewController.deleteReview);
 
 module.exports = router;

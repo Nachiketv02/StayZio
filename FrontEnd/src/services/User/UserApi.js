@@ -270,5 +270,46 @@ export const deleteBooking = async (id) => {
   }
 };
 
+//review
+
+export const createReview = async (formData) => {
+  try {
+    const response = await api.post("/review", formData);
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to create review. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const getPropertyReviews = async (id) => {
+  try {
+    const response = await api.get(`/property/${id}/reviews`);
+    return response.data.reviews;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch reviews. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const deleteReview = async (id) => {
+  try {
+    const response = await api.delete(`/review/${id}`);
+    return response;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to delete review. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
 
 

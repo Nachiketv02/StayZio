@@ -72,6 +72,14 @@ const propertyListingSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'user',
     required: true
+  },
+  rating: {
+    type: Number,
+    default: 0
+  },
+  reviewsCount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

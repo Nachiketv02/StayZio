@@ -21,6 +21,10 @@ const bookingSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    reviewed: {
+        type: Boolean,
+        default: false
+    },
     propertyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'propertyListing',

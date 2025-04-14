@@ -229,7 +229,7 @@ function Properties() {
                       <div className="flex items-center shrink-0">
                         <span className="text-yellow-400">★</span>
                         <span className="ml-1 text-gray-700">{property.rating}</span>
-                        <span className="ml-1 text-gray-500">({property.reviews})</span>
+                        <span className="ml-1 text-gray-500">({property.reviewsCount})</span>
                       </div>
                     </div>
                     <p className="text-gray-600 mb-4 line-clamp-1">{property.location}, {property.country}</p>

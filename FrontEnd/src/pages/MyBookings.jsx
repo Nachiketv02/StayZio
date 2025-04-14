@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaMoneyBillWave, FaCheckCircle, FaSpinner, FaStar, FaTimes } from 'react-icons/fa';
-import { getMyBookings } from '../services/User/UserApi';
+import { getMyBookings, createReview } from '../services/User/UserApi';
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -14,6 +14,7 @@ function MyBookings() {
     comment: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -29,19 +30,39 @@ function MyBookings() {
 
     fetchBookings();
   }, []);
-
   const getFilteredBookings = () => {
     const today = new Date();
+  
+    const activeBookings = bookings.filter(
+      booking => new Date(booking.checkIn) <= today && new Date(booking.checkOut) >= today
+    );
+  
+    const upcomingBookings = bookings.filter(
+      booking => new Date(booking.checkIn) > today
+    );
+  
+    const pastBookings = bookings.filter(
+      booking => new Date(booking.checkOut) < today
+    );
+  
     switch (filter) {
       case 'upcoming':
-        return bookings.filter(booking => new Date(booking.checkIn) >= today);
+        return upcomingBookings.sort(
+          (a, b) => new Date(a.checkIn) - new Date(b.checkIn)
+        );
       case 'past':
-        return bookings.filter(booking => new Date(booking.checkOut) < today);
+        return pastBookings.sort(
+          (a, b) => new Date(b.checkOut) - new Date(a.checkOut)
+        );
+      case 'all':
       default:
-        return bookings.filter(booking => {
-          const checkOut = new Date(booking.checkOut);
-          return checkOut >= today;
-        });
+        const sortedActive = activeBookings.sort(
+          (a, b) => new Date(a.checkIn) - new Date(b.checkIn)
+        );
+        const sortedUpcoming = upcomingBookings.sort(
+          (a, b) => new Date(a.checkIn) - new Date(b.checkIn)
+        );
+        return [...sortedActive, ...sortedUpcoming];
     }
   };
 
@@ -50,42 +71,49 @@ function MyBookings() {
     const startDate = new Date(checkIn);
     const endDate = new Date(checkOut);
 
-    if (today < startDate) return 'bg-blue-100 text-blue-800'; // Upcoming
-    if (today > endDate) return 'bg-gray-100 text-gray-800'; // Past
-    return 'bg-green-100 text-green-800'; // Active
+    if (today < startDate) return 'bg-blue-100 text-blue-800';
+    if (today > endDate) return 'bg-gray-100 text-gray-800';
+    return 'bg-green-100 text-green-800';
   };
 
   const handleReviewClick = (booking) => {
     setSelectedBooking(booking);
+    setReview({ rating: 0, comment: '' });
+    setError('');
     setShowReviewModal(true);
   };
 
   const handleSubmitReview = async () => {
     if (review.rating === 0) {
-      alert('Please select a rating');
+      setError('Please select a rating');
+      return;
+    }
+
+    if (review.comment.length < 10) {
+      setError('Review must be at least 10 characters');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await createReview({
+        propertyId: selectedBooking.propertyId._id,
+        bookingId: selectedBooking._id,
+        rating: review.rating,
+        comment: review.comment
+      });
+
       // Update the booking in state to show it's been reviewed
-      const updatedBookings = bookings.map(booking => 
+      setBookings(prev => prev.map(booking => 
         booking._id === selectedBooking._id 
-          ? { ...booking, hasReview: true }
+          ? { ...booking, reviewed: true } 
           : booking
-      );
-      setBookings(updatedBookings);
+      ));
       
-      // Reset and close modal
-      setReview({ rating: 0, comment: '' });
-      setSelectedBooking(null);
       setShowReviewModal(false);
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('Failed to submit review. Please try again.');
+      setError(error.response?.data?.message || 'Failed to submit review');
     } finally {
       setIsSubmitting(false);
     }
@@ -202,20 +230,25 @@ function MyBookings() {
                           <FaCheckCircle className="w-5 h-5 mr-2" />
                           <span>Booking Confirmed</span>
                         </div>
-                        {filter === 'past' && !booking.hasReview && (
-                          <motion.button
-                            onClick={() => handleReviewClick(booking)}
-                            className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium flex items-center"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            <FaStar className="mr-2" />
-                            Write Review
-                          </motion.button>
-                        )}
-                        {filter === 'past' && booking.hasReview && (
-                          <span className="text-gray-500 italic">Review submitted</span>
-                        )}
+                        <div className="flex space-x-2">
+                          {new Date(booking.checkOut) < new Date() && !booking.reviewed && (
+                            <motion.button
+                              onClick={() => handleReviewClick(booking)}
+                              className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium flex items-center"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              <FaStar className="mr-2" />
+                              Write Review
+                            </motion.button>
+                          )}
+                          {new Date(booking.checkOut) < new Date() && booking.reviewed && (
+                            <span className="px-4 py-2 text-green-600 font-medium flex items-center">
+                              <FaCheckCircle className="mr-2" />
+                              Reviewed
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -297,7 +330,16 @@ function MyBookings() {
                   rows={4}
                   placeholder="Share your experience..."
                 ></textarea>
+                <p className="text-xs text-gray-500 mt-1">
+                  {review.comment.length}/500 characters
+                </p>
               </div>
+
+              {error && (
+                <div className="mb-4 text-red-600 text-sm">
+                  {error}
+                </div>
+              )}
 
               <div className="flex justify-end space-x-4">
                 <motion.button

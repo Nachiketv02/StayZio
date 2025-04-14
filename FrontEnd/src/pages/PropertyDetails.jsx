@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FaBed,
   FaBath,
@@ -15,24 +15,29 @@ import {
   FaUser,
   FaMapMarkerAlt,
   FaSnowflake,
+  FaTrash,
 } from "react-icons/fa";
-import { getPropertyById } from "../services/User/UserApi";
+import { getPropertyById, getPropertyReviews, deleteReview } from "../services/User/UserApi";
 import { useNavigate } from "react-router-dom";
+import { UserDataContext } from "../context/UserContex";
 
 const amenityIcons = {
-  'WiFi': FaWifi,
-  'Parking': FaParking,
-  'Swimming Pool': FaSwimmingPool,
-  'TV': FaTv,
-  'Kitchen': FaUtensils,
-  'Pet Friendly': FaDog,
-  'Air Conditioning': FaSnowflake,
+  WiFi: FaWifi,
+  Parking: FaParking,
+  "Swimming Pool": FaSwimmingPool,
+  TV: FaTv,
+  Kitchen: FaUtensils,
+  "Pet Friendly": FaDog,
+  "Air Conditioning": FaSnowflake,
 };
 
 function PropertyDetails() {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
   const [property, setProperty] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const { userData } = useContext(UserDataContext);
 
   const navigate = useNavigate();
 
@@ -48,14 +53,49 @@ function PropertyDetails() {
     fetchProperty();
   }, [id]);
 
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const reviewsData = await getPropertyReviews(id);
+        setReviews(reviewsData);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+    fetchReviews();
+  }, [id]);
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await deleteReview(reviewId);
+      setReviews(reviews.filter(review => review._id !== reviewId));
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error("Error deleting review:", error);
+    }
+  };
+
   if (!property) {
-    return <div className="min-h-screen pt-20 bg-gray-50 flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen pt-20 bg-gray-50 flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
-  const amenitiesWithIcons = property.amenities?.map(amenity => ({
-    name: amenity,
-    icon: amenityIcons[amenity] || FaWifi
-  })) || [];
+  const amenitiesWithIcons =
+    property.amenities?.map((amenity) => ({
+      name: amenity,
+      icon: amenityIcons[amenity] || FaWifi,
+    })) || [];
+
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
 
   return (
     <div className="min-h-screen pt-20 bg-gray-50">
@@ -68,7 +108,10 @@ function PropertyDetails() {
             animate={{ opacity: 1, y: 0 }}
           >
             <img
-              src={property.images?.[selectedImage]?.url || 'https://via.placeholder.com/800x600'}
+              src={
+                property.images?.[selectedImage]?.url ||
+                "https://via.placeholder.com/800x600"
+              }
               alt={property.title}
               className="absolute w-full h-full object-cover"
             />
@@ -87,7 +130,7 @@ function PropertyDetails() {
                 whileHover={{ scale: 1.02 }}
               >
                 <img
-                  src={image.url || 'https://via.placeholder.com/400x300'}
+                  src={image.url || "https://via.placeholder.com/400x300"}
                   alt={`${property.title} ${index + 1}`}
                   className="absolute w-full h-full object-cover"
                 />
@@ -113,8 +156,8 @@ function PropertyDetails() {
                 </div>
                 <div className="flex items-center">
                   <FaStar className="text-yellow-400 mr-1" />
-                  <span>4.9</span>
-                  <span className="ml-1">(128 reviews)</span>
+                  <span>{property.rating}</span>
+                  <span className="ml-1">({property.reviewsCount} reviews)</span>
                 </div>
               </div>
             </div>
@@ -172,6 +215,102 @@ function PropertyDetails() {
                 ))}
               </div>
             </motion.div>
+
+            {reviews.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
+                <div className="space-y-6">
+                  {reviews.map((review) => (
+                    <div
+                      key={review._id}
+                      className="bg-white p-6 rounded-xl shadow-sm relative"
+                    >
+                      <div className="flex items-center mb-4">
+                        <div>
+                          <h3 className="font-medium">
+                            {review.userId.fullName}
+                          </h3>
+                          <div className="flex items-center text-sm text-gray-500">
+                            <span>{formatDate(review.createdAt)}</span>
+                            <span className="mx-2">•</span>
+                            <div className="flex items-center">
+                              <FaStar className="text-yellow-400 mr-1" />
+                              <span>{review.rating}</span>
+                            </div>
+                          </div>
+                        </div>
+                        {userData?._id === review.userId._id && (
+                          <motion.button
+                            className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setDeleteConfirm(review._id)}
+                          >
+                            <FaTrash className="w-4 h-4" />
+                          </motion.button>
+                        )}
+                      </div>
+                      <p className="text-gray-600 mb-3">{review.comment}</p>
+
+                      <div className="flex items-center text-sm text-primary-600">
+                        <FaCalendarAlt className="mr-2" />
+                        <span>
+                          Verified stay - (
+                          {formatDate(review.bookingId.checkIn)} -{" "}
+                          {formatDate(review.bookingId.checkOut)})
+                        </span>
+                      </div>
+
+                      {/* Delete Confirmation Modal */}
+                      <AnimatePresence>
+                        {deleteConfirm === review._id && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                          >
+                            <motion.div
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.9, opacity: 0 }}
+                              className="bg-white rounded-xl p-6 max-w-sm mx-4"
+                            >
+                              <h3 className="text-xl font-semibold mb-4">Delete Review</h3>
+                              <p className="text-gray-600 mb-6">
+                                Are you sure you want to delete this review? This action cannot be undone.
+                              </p>
+                              <div className="flex justify-end space-x-4">
+                                <motion.button
+                                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => setDeleteConfirm(null)}
+                                >
+                                  Cancel
+                                </motion.button>
+                                <motion.button
+                                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => handleDeleteReview(review._id)}
+                                >
+                                  Delete
+                                </motion.button>
+                              </div>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </div>
 
           <div className="md:col-span-1">
@@ -187,7 +326,9 @@ function PropertyDetails() {
               </div>
 
               <motion.button
-                onClick={() => navigate(`/booking/${property._id}`, { state: { property } })}
+                onClick={() =>
+                  navigate(`/booking/${property._id}`, { state: { property } })
+                }
                 className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-3 rounded-lg font-medium shadow-lg"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -203,10 +344,14 @@ function PropertyDetails() {
                   </div>
                   <div>
                     <h3 className="font-medium">
-                      Hosted by {property.userId?.fullName || 'Host'}
+                      Hosted by {property.userId?.fullName || "Host"}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      Joined in {new Date(property.createdAt).toLocaleDateString('default', { month: 'long', year: 'numeric' })}
+                      Joined in{" "}
+                      {new Date(property.createdAt).toLocaleDateString(
+                        "default",
+                        { month: "long", year: "numeric" }
+                      )}
                     </p>
                   </div>
                 </div>
@@ -226,6 +371,5 @@ function PropertyDetails() {
     </div>
   );
 }
-
 
 export default PropertyDetails;
