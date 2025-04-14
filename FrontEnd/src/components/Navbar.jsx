@@ -8,7 +8,7 @@ import {
   FaChevronDown,
   FaHeart,
   FaHome,
-  FaCalendarAlt
+  FaCalendarAlt,
 } from "react-icons/fa";
 import { UserDataContext } from "../context/UserContex";
 import { logout } from "../services/User/UserApi";
@@ -63,6 +63,7 @@ function Navbar() {
     setUserData(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    useFavoriteStore.getState().setFavorites([]);
   };
 
   const handleProfile = () => {
@@ -155,18 +156,40 @@ function Navbar() {
             <Link to="/favorites">
               <motion.div
                 className="relative"
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <FaHeart className={`w-6 h-6 ${isHeroSection ? "text-white" : "text-primary-600"}`} />
-                {favorites.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                    {favorites.length}
-                  </span>
-                )}
+                <div
+                  className={`p-3 rounded-full flex items-center justify-center ${
+                    isHeroSection
+                      ? "bg-white/10 hover:bg-white/20"
+                      : "bg-primary-50 hover:bg-primary-100"
+                  }`}
+                >
+                  <FaHeart
+                    className={`w-5 h-5 ${
+                      isHeroSection
+                        ? "text-white"
+                        : favorites.length > 0
+                        ? "text-red-500"
+                        : "text-primary-600"
+                    }`}
+                  />
+                  {favorites.length > 0 && (
+                    <span
+                      className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                        isHeroSection
+                          ? "bg-white text-primary-600"
+                          : "bg-primary-600 text-white"
+                      }`}
+                    >
+                      {favorites.length}
+                    </span>
+                  )}
+                </div>
               </motion.div>
             </Link>
-            
+
             {isAuthenticated ? (
               <div className="relative" ref={dropdownRef}>
                 <motion.button
@@ -356,11 +379,23 @@ function Navbar() {
               </Link>
               <Link to="/favorites">
                 <motion.div
-                  className="block py-2 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-lg px-2 transition-colors"
+                  className="flex items-center justify-between py-2 px-2 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                   whileHover={{ x: 10 }}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Favorites ({favorites.length})
+                  <div className="flex items-center space-x-2">
+                    <FaHeart
+                      className={
+                        favorites.length > 0 ? "text-red-500" : "text-gray-400"
+                      }
+                    />
+                    <span>Wishlist</span>
+                  </div>
+                  {favorites.length > 0 && (
+                    <span className="bg-primary-600 text-white text-sm px-2 py-1 rounded-full">
+                      {favorites.length}
+                    </span>
+                  )}
                 </motion.div>
               </Link>
               {isAuthenticated ? (

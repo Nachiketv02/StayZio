@@ -68,22 +68,52 @@ function Properties() {
     }
 
     try {
-      const isFavorite = favorites.some((fav) => fav._id === property._id);
+      // Check if property exists in favorites (using both possible structures)
+      const isFavorite = favorites.some(
+        (fav) =>
+          fav._id === property._id || fav.propertyId?._id === property._id
+      );
+
       if (isFavorite) {
         await removeFavorite(property._id);
         removeFromStore(property._id);
         toast.success("Removed from favorites");
       } else {
-        await addFavorite(property._id);
+        const response = await addFavorite(property._id);
+        // Use the response data to update store if needed
         addToStore(property);
         toast.success("Added to favorites");
       }
     } catch (error) {
+      console.error("Favorite error:", error);
       toast.error(
         error.response?.data?.message || "Failed to update favorites"
       );
+      // Refresh favorites from server on error
+      if (isAuthenticated) {
+        const updatedFavorites = await getFavorites();
+        setFavorites(updatedFavorites);
+      }
     }
   };
+
+  useEffect(() => {
+    const syncFavorites = async () => {
+      if (isAuthenticated) {
+        try {
+          const updatedFavorites = await getFavorites();
+          setFavorites(updatedFavorites);
+        } catch (error) {
+          console.error("Failed to sync favorites:", error);
+        }
+      } else {
+        setFavorites([]);
+      }
+    };
+
+    // Sync on mount and when authentication changes
+    syncFavorites();
+  }, [isAuthenticated, setFavorites]);
 
   const fetchProperties = async () => {
     try {
@@ -268,7 +298,11 @@ function Properties() {
                     >
                       <FaHeart
                         className={`w-5 h-5 ${
-                          favorites.some((fav) => fav._id === property._id)
+                          favorites.some(
+                            (fav) =>
+                              fav._id === property._id ||
+                              fav.propertyId?._id === property._id
+                          )
                             ? "text-red-500"
                             : "text-gray-400"
                         }`}
