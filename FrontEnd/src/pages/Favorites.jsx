@@ -1,16 +1,57 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { FaBed, FaBath, FaWifi, FaParking, FaSwimmingPool, FaHeart } from 'react-icons/fa'
-import useFavoriteStore from '../store/favoriteStore'
-import toast from 'react-hot-toast'
+import { useEffect, useContext } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import {
+  FaBed,
+  FaBath,
+  FaWifi,
+  FaParking,
+  FaSwimmingPool,
+  FaHeart,
+  FaSnowflake,
+  FaTv,
+  FaUtensils,
+  FaWater,
+  FaDumbbell,
+  FaDog,
+  FaUmbrellaBeach,
+} from "react-icons/fa";
+import useFavoriteStore from "../store/favoriteStore";
+import toast from "react-hot-toast";
+import { getFavorites, removeFavorite } from "../services/User/UserApi";
+import { UserDataContext } from "../context/UserContex";
 
 function Favorites() {
-  const { favorites, removeFavorite } = useFavoriteStore()
+  const {
+    favorites,
+    removeFavorite: removeFromStore,
+    setFavorites,
+  } = useFavoriteStore();
+  const { isAuthenticated } = useContext(UserDataContext);
 
-  const handleRemoveFavorite = (property) => {
-    removeFavorite(property.id)
-    toast.success('Removed from favorites')
-  }
+  useEffect(() => {
+    const loadFavorites = async () => {
+      if (isAuthenticated) {
+        try {
+          const favorites = await getFavorites();
+          setFavorites(favorites);
+        } catch (error) {
+          console.error("Error loading favorites:", error);
+        }
+      }
+    };
+    loadFavorites();
+  }, [isAuthenticated, setFavorites]);
+
+  const handleRemoveFavorite = async (property) => {
+    try {
+      await removeFavorite(property.propertyId._id);
+      removeFromStore(property._id);
+      toast.success("Removed from favorites");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to remove favorite");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -20,8 +61,12 @@ function Favorites() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-gray-900">Your Favorite Properties</h1>
-          <p className="text-gray-600 mt-2">Manage your saved properties all in one place</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Your Favorite Properties
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Manage your saved properties all in one place
+          </p>
         </motion.div>
 
         {favorites.length === 0 ? (
@@ -31,8 +76,12 @@ function Favorites() {
             className="text-center py-16"
           >
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">No favorites yet</h2>
-              <p className="text-gray-600 mb-6">Start exploring and save properties you love!</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                No favorites yet
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Start exploring and save properties you love!
+              </p>
               <Link to="/properties">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -49,7 +98,7 @@ function Favorites() {
             <AnimatePresence>
               {favorites.map((property) => (
                 <motion.div
-                  key={property.id}
+                  key={property._id}
                   layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -58,8 +107,8 @@ function Favorites() {
                 >
                   <div className="relative aspect-w-16 aspect-h-9">
                     <img
-                      src={property.image}
-                      alt={property.title}
+                      src={property.propertyId?.images?.[0]?.url}
+                      alt={property.propertyId?.title}
                       className="absolute w-full h-full object-cover"
                     />
                     <motion.button
@@ -71,47 +120,99 @@ function Favorites() {
                       <FaHeart className="w-5 h-5 text-red-500" />
                     </motion.button>
                     <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-full text-sm font-semibold text-primary-600">
-                      ${property.price}/night
+                      ${property.propertyId?.price}/night
                     </div>
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900">{property.title}</h3>
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {property.propertyId?.title}
+                      </h3>
                       <div className="flex items-center">
                         <span className="text-yellow-400">★</span>
-                        <span className="ml-1 text-gray-700">{property.rating}</span>
-                        <span className="ml-1 text-gray-500">({property.reviews})</span>
+                        <span className="ml-1 text-gray-700">
+                          {property.propertyId?.rating}
+                        </span>
+                        <span className="ml-1 text-gray-500">
+                          ({property.propertyId?.reviewsCount})
+                        </span>
                       </div>
                     </div>
-                    <p className="text-gray-600 mb-4">{property.location}</p>
+                    <p className="text-gray-600 mb-4">
+                      {property.propertyId?.location},{" "}
+                      {property.propertyId?.country}
+                    </p>
                     <div className="flex items-center gap-4 mb-6 text-gray-600">
                       <div className="flex items-center">
                         <FaBed className="mr-2" />
-                        <span>{property.beds} beds</span>
+                        <span>{property.propertyId?.bedrooms} beds</span>
                       </div>
                       <div className="flex items-center">
                         <FaBath className="mr-2" />
-                        <span>{property.baths} baths</span>
+                        <span>{property.propertyId?.bathrooms} baths</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mb-6">
-                      {property.amenities.includes("WiFi") && (
+                    <div className="flex flex-wrap items-center gap-2 mb-6">
+                      {property.propertyId?.amenities.includes("WiFi") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaWifi className="inline mr-1" /> WiFi
                         </div>
                       )}
-                      {property.amenities.includes("Parking") && (
+                      {property.propertyId?.amenities.includes("Parking") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaParking className="inline mr-1" /> Parking
                         </div>
                       )}
-                      {property.amenities.includes("Pool") && (
+                      {property.propertyId?.amenities.includes("Pool") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaSwimmingPool className="inline mr-1" /> Pool
                         </div>
                       )}
+                      {property.propertyId?.amenities.includes("Air Conditioning") && (
+                        <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                          <FaSnowflake className="inline mr-1" /> Air
+                          Conditioning
+                        </div>
+                      )}
+                      {property.propertyId?.amenities.includes("TV") && (
+                        <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                          <FaTv className="inline mr-1" /> TV
+                        </div>
+                      )}
+                      {property.propertyId?.amenities.includes("Beach Access") && (
+                        <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                          <FaUmbrellaBeach className="inline mr-1" /> Beach
+                          Access
+                        </div>
+                      )}
+                      {property.propertyId?.amenities.includes("Pet Friendly") && (
+                        <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                          <FaDog className="inline mr-1" /> Pet Friendly
+                        </div>
+                      )}
+                      {property.propertyId?.amenities.includes("Ocean View") && (
+                        <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                          <FaWater className="inline mr-1" /> Ocean View
+                        </div>
+                      )}
+                      {property.propertyId?.amenities.includes("Gym") && (
+                        <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                          <FaDumbbell className="inline mr-1" /> Gym
+                        </div>
+                      )}
+                      {property.propertyId?.amenities.includes("Kitchen") && (
+                        <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                          <FaUtensils className="inline mr-1" /> Kitchen
+                        </div>
+                      )}
+                      {property.propertyId?.amenities.includes("Swimming Pool") && (
+                        <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                          <FaSwimmingPool className="inline mr-1" /> Swimming
+                          Pool
+                        </div>
+                      )}
                     </div>
-                    <Link to={`/properties/${property.id}`}>
+                    <Link to={`/properties/${property.propertyId?._id}`}>
                       <motion.button
                         className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-3 rounded-lg font-medium"
                         whileHover={{ scale: 1.02 }}
@@ -128,7 +229,7 @@ function Favorites() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default Favorites
+export default Favorites;

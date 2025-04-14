@@ -311,5 +311,47 @@ export const deleteReview = async (id) => {
   }
 };
 
+//Favorite
+
+export const addFavorite = async (propertyId) => {
+  try {
+    const response = await api.post("/favorite", { propertyId });
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to add favorite. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const getFavorites = async () => {
+  try {
+    const response = await api.get("/favorite");
+    console.log(response.data);
+    return response.data.favorites;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch favorites. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const removeFavorite = async (propertyId) => {
+  try {
+    const response = await api.delete(`/favorite/${propertyId}`);
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to remove favorite. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
 
 

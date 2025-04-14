@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaSearch, 
-  FaBed, 
-  FaBath, 
-  FaWifi, 
-  FaParking, 
-  FaSwimmingPool, 
+import { useState, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaSearch,
+  FaBed,
+  FaBath,
+  FaWifi,
+  FaParking,
+  FaSwimmingPool,
   FaHeart,
   FaSpinner,
   FaSnowflake,
@@ -16,33 +16,72 @@ import {
   FaWater,
   FaDumbbell,
   FaDog,
-  FaUmbrellaBeach
-} from 'react-icons/fa';
-import useFavoriteStore from '../store/favoriteStore';
-import toast from 'react-hot-toast';
-import { getAllProperties } from '../services/User/UserApi';
+  FaUmbrellaBeach,
+} from "react-icons/fa";
+import useFavoriteStore from "../store/favoriteStore";
+import toast from "react-hot-toast";
+import {
+  getAllProperties,
+  addFavorite,
+  removeFavorite,
+  getFavorites,
+} from "../services/User/UserApi";
+import { UserDataContext } from "../context/UserContex";
 
 function Properties() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
-    location: '',
-    priceRange: 'all',
-    propertyType: 'all',
-    amenities: []
+    location: "",
+    priceRange: "all",
+    propertyType: "all",
+    amenities: [],
   });
 
-  const { favorites, addFavorite, removeFavorite } = useFavoriteStore();
+  const {
+    favorites,
+    addFavorite: addToStore,
+    removeFavorite: removeFromStore,
+    setFavorites,
+  } = useFavoriteStore();
+  const { isAuthenticated } = useContext(UserDataContext);
 
-  const handleFavoriteClick = (property) => {
-    const isFavorite = favorites.some(fav => fav.id === property.id);
-    if (isFavorite) {
-      removeFavorite(property.id);
-      toast.success('Removed from favorites');
-    } else {
-      addFavorite(property);
-      toast.success('Added to favorites');
+  useEffect(() => {
+    const loadFavorites = async () => {
+      if (isAuthenticated) {
+        try {
+          const favs = await getFavorites();
+          setFavorites(favs);
+        } catch (error) {
+          console.error("Error loading favorites:", error);
+        }
+      }
+    };
+    loadFavorites();
+  }, [isAuthenticated, setFavorites]);
+
+  const handleFavoriteClick = async (property) => {
+    if (!isAuthenticated) {
+      toast.error("Please login to add favorites");
+      return;
+    }
+
+    try {
+      const isFavorite = favorites.some((fav) => fav._id === property._id);
+      if (isFavorite) {
+        await removeFavorite(property._id);
+        removeFromStore(property._id);
+        toast.success("Removed from favorites");
+      } else {
+        await addFavorite(property._id);
+        addToStore(property);
+        toast.success("Added to favorites");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update favorites"
+      );
     }
   };
 
@@ -53,7 +92,7 @@ function Properties() {
       setProperties(response);
     } catch (error) {
       setError(error.message);
-      toast.error('Failed to fetch properties');
+      toast.error("Failed to fetch properties");
     } finally {
       setLoading(false);
     }
@@ -63,25 +102,31 @@ function Properties() {
     fetchProperties();
   }, []);
 
-  const filteredProperties = properties.filter(property => {
-    if (filters.location && !property.location.toLowerCase().includes(filters.location.toLowerCase())) {
+  const filteredProperties = properties.filter((property) => {
+    if (
+      filters.location &&
+      !property.location.toLowerCase().includes(filters.location.toLowerCase())
+    ) {
       return false;
     }
-    if (filters.propertyType !== 'all' && property.type !== filters.propertyType) {
+    if (
+      filters.propertyType !== "all" &&
+      property.type !== filters.propertyType
+    ) {
       return false;
     }
     const price = property.price;
     switch (filters.priceRange) {
-      case '1000-3000':
+      case "1000-3000":
         if (price < 1000 || price > 3000) return false;
         break;
-      case '3000-6000':
+      case "3000-6000":
         if (price < 3000 || price > 6000) return false;
         break;
-      case '6000-10000':
+      case "6000-10000":
         if (price < 6000 || price > 10000) return false;
         break;
-      case '10000+':
+      case "10000+":
         if (price < 10000) return false;
         break;
       default:
@@ -104,7 +149,9 @@ function Properties() {
                   placeholder="Search by location..."
                   className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
                   value={filters.location}
-                  onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                  onChange={(e) =>
+                    setFilters({ ...filters, location: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -112,7 +159,9 @@ function Properties() {
               <select
                 className="w-full md:w-auto px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
                 value={filters.priceRange}
-                onChange={(e) => setFilters({ ...filters, priceRange: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, priceRange: e.target.value })
+                }
               >
                 <option value="all">All Prices</option>
                 <option value="1000-3000">₹1,000 - ₹3,000</option>
@@ -123,7 +172,9 @@ function Properties() {
               <select
                 className="w-full md:w-auto px-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all"
                 value={filters.propertyType}
-                onChange={(e) => setFilters({ ...filters, propertyType: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, propertyType: e.target.value })
+                }
               >
                 <option value="all">All Types</option>
                 <option value="Apartment">Apartment</option>
@@ -174,14 +225,18 @@ function Properties() {
               exit={{ opacity: 0 }}
               className="text-center py-12"
             >
-              <p className="text-gray-600">No properties found matching your criteria.</p>
+              <p className="text-gray-600">
+                No properties found matching your criteria.
+              </p>
               <button
-                onClick={() => setFilters({
-                  location: '',
-                  priceRange: 'all',
-                  propertyType: 'all',
-                  amenities: []
-                })}
+                onClick={() =>
+                  setFilters({
+                    location: "",
+                    priceRange: "all",
+                    propertyType: "all",
+                    amenities: [],
+                  })
+                }
                 className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
               >
                 Clear Filters
@@ -211,28 +266,36 @@ function Properties() {
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleFavoriteClick(property)}
                     >
-                      <FaHeart 
+                      <FaHeart
                         className={`w-5 h-5 ${
-                          favorites.some(fav => fav.id === property.id)
-                            ? 'text-red-500'
-                            : 'text-gray-400'
+                          favorites.some((fav) => fav._id === property._id)
+                            ? "text-red-500"
+                            : "text-gray-400"
                         }`}
                       />
                     </motion.button>
                     <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-full text-sm font-semibold text-primary-600">
-                      ₹{property.price.toLocaleString('en-IN')}/night
+                      ₹{property.price.toLocaleString("en-IN")}/night
                     </div>
                   </div>
                   <div className="p-6 flex flex-col flex-grow">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">{property.title}</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">
+                        {property.title}
+                      </h3>
                       <div className="flex items-center shrink-0">
                         <span className="text-yellow-400">★</span>
-                        <span className="ml-1 text-gray-700">{property.rating}</span>
-                        <span className="ml-1 text-gray-500">({property.reviewsCount})</span>
+                        <span className="ml-1 text-gray-700">
+                          {property.rating}
+                        </span>
+                        <span className="ml-1 text-gray-500">
+                          ({property.reviewsCount})
+                        </span>
                       </div>
                     </div>
-                    <p className="text-gray-600 mb-4 line-clamp-1">{property.location}, {property.country}</p>
+                    <p className="text-gray-600 mb-4 line-clamp-1">
+                      {property.location}, {property.country}
+                    </p>
                     <div className="flex items-center gap-4 mb-4 text-gray-600">
                       <div className="flex items-center">
                         <FaBed className="mr-2" />
@@ -261,7 +324,8 @@ function Properties() {
                       )}
                       {property.amenities?.includes("Air Conditioning") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
-                          <FaSnowflake className="inline mr-1" /> Air Conditioning
+                          <FaSnowflake className="inline mr-1" /> Air
+                          Conditioning
                         </div>
                       )}
                       {property.amenities?.includes("TV") && (
@@ -271,7 +335,8 @@ function Properties() {
                       )}
                       {property.amenities?.includes("Beach Access") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
-                          <FaUmbrellaBeach className="inline mr-1" /> Beach Access
+                          <FaUmbrellaBeach className="inline mr-1" /> Beach
+                          Access
                         </div>
                       )}
                       {property.amenities?.includes("Pet Friendly") && (
@@ -296,7 +361,8 @@ function Properties() {
                       )}
                       {property.amenities?.includes("Swimming Pool") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
-                          <FaSwimmingPool className="inline mr-1" /> Swimming Pool
+                          <FaSwimmingPool className="inline mr-1" /> Swimming
+                          Pool
                         </div>
                       )}
                     </div>

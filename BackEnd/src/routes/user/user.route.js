@@ -7,6 +7,9 @@ const propertyListingController = require("../../controller/user/properttyListin
 const upload = require("../../middleware/upload");
 const bookingController = require("../../controller/user/booking.controller");
 const reviewController = require("../../controller/user/review.controller");
+const favoriteController = require("../../controller/user/favorite.controller");
+
+//user routes
 
 router.post('/register', [
     body('fullName').trim().isString().withMessage("Name must be a string"),
@@ -37,8 +40,6 @@ router.get('/profile', authMiddleware.isAuthenticated, userController.getProfile
 router.post('/logout', authMiddleware.isAuthenticated, userController.logoutUser);
 
 // Property Listing Routes
-
-// Update the property listing route
 router.post(
   '/list-property',
   authMiddleware.isAuthenticated,
@@ -100,5 +101,13 @@ router.get('/reviews', authMiddleware.isAuthenticated, reviewController.getMyRev
 router.get('/property/:propertyId/reviews', authMiddleware.isAuthenticated, reviewController.getPropertyReviews);
 
 router.delete('/review/:reviewId', authMiddleware.isAuthenticated, reviewController.deleteReview);
+
+// Favorite Routes
+
+router.post('/favorite', authMiddleware.isAuthenticated, favoriteController.addFavorite);
+
+router.get('/favorite', authMiddleware.isAuthenticated, favoriteController.getFavorites);
+
+router.delete('/favorite/:propertyId', authMiddleware.isAuthenticated, favoriteController.removeFavorite);
 
 module.exports = router;
