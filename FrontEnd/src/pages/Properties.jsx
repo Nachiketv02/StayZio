@@ -192,14 +192,14 @@ function Properties() {
               {filteredProperties.map((property) => (
                 <motion.div
                   key={property._id}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden"
+                  className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -5 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="relative aspect-w-16 aspect-h-9">
+                  <div className="relative h-64 w-full overflow-hidden">
                     <img
                       src={property.images?.[0]?.url}
                       alt={property.title}
@@ -223,17 +223,17 @@ function Properties() {
                       ₹{property.price.toLocaleString('en-IN')}/night
                     </div>
                   </div>
-                  <div className="p-6">
+                  <div className="p-6 flex flex-col flex-grow">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900">{property.title}</h3>
-                      <div className="flex items-center">
+                      <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">{property.title}</h3>
+                      <div className="flex items-center shrink-0">
                         <span className="text-yellow-400">★</span>
                         <span className="ml-1 text-gray-700">{property.rating}</span>
                         <span className="ml-1 text-gray-500">({property.reviews})</span>
                       </div>
                     </div>
-                    <p className="text-gray-600 mb-4">{property.location}, {property.country}</p>
-                    <div className="flex items-center gap-4 mb-6 text-gray-600">
+                    <p className="text-gray-600 mb-4 line-clamp-1">{property.location}, {property.country}</p>
+                    <div className="flex items-center gap-4 mb-4 text-gray-600">
                       <div className="flex items-center">
                         <FaBed className="mr-2" />
                         <span>{property.bedrooms} beds</span>
@@ -244,71 +244,73 @@ function Properties() {
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 mb-6">
-                      {property.amenities.includes("WiFi") && (
+                      {property.amenities?.includes("WiFi") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaWifi className="inline mr-1" /> WiFi
                         </div>
                       )}
-                      {property.amenities.includes("Parking") && (
+                      {property.amenities?.includes("Parking") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaParking className="inline mr-1" /> Parking
                         </div>
                       )}
-                      {property.amenities.includes("Pool") && (
+                      {property.amenities?.includes("Pool") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaSwimmingPool className="inline mr-1" /> Pool
                         </div>
                       )}
-                      {property.amenities.includes("Air Conditioning") && (
+                      {property.amenities?.includes("Air Conditioning") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaSnowflake className="inline mr-1" /> Air Conditioning
                         </div>
                       )}
-                      {property.amenities.includes("TV") && (
+                      {property.amenities?.includes("TV") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaTv className="inline mr-1" /> TV
                         </div>
                       )}
-                      {property.amenities.includes("Beach Access") && (
+                      {property.amenities?.includes("Beach Access") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaUmbrellaBeach className="inline mr-1" /> Beach Access
                         </div>
                       )}
-                      {property.amenities.includes("Pet Friendly") && (
+                      {property.amenities?.includes("Pet Friendly") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaDog className="inline mr-1" /> Pet Friendly
                         </div>
                       )}
-                      {property.amenities.includes("Ocean View") && (
+                      {property.amenities?.includes("Ocean View") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaWater className="inline mr-1" /> Ocean View
                         </div>
                       )}
-                      {property.amenities.includes("Gym") && (
+                      {property.amenities?.includes("Gym") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaDumbbell className="inline mr-1" /> Gym
                         </div>
                       )}
-                      {property.amenities.includes("Kitchen") && (
+                      {property.amenities?.includes("Kitchen") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaUtensils className="inline mr-1" /> Kitchen
                         </div>
                       )}
-                      {property.amenities.includes("Swimming Pool") && (
+                      {property.amenities?.includes("Swimming Pool") && (
                         <div className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                           <FaSwimmingPool className="inline mr-1" /> Swimming Pool
                         </div>
                       )}
                     </div>
-                    <Link to={`/properties/${property._id}`}>
-                      <motion.button
-                        className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-3 rounded-lg font-medium"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        View Details
-                      </motion.button>
-                    </Link>
+                    <div className="mt-auto">
+                      <Link to={`/properties/${property._id}`}>
+                        <motion.button
+                          className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-3 rounded-lg font-medium"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          View Details
+                        </motion.button>
+                      </Link>
+                    </div>
                   </div>
                 </motion.div>
               ))}

@@ -16,21 +16,34 @@ module.exports.createBooking = async (req, res) => {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    if (checkIn >= checkOut) {
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    if (checkInDate >= checkOutDate) {
       return res
         .status(400)
         .json({ message: "Check-in date must be before check-out date" });
     }
 
-    const conflictingBooking = await bookingModel.findOne({
+    const conflictingBookings = await bookingModel.find({
       propertyId,
-      checkIn: { $lte: checkOut },
-      checkOut: { $gte: checkIn },
+      $or: [
+        {
+          checkIn: { $lt: checkOutDate },
+          checkOut: { $gt: checkInDate }
+        }
+      ]
     });
-    if (conflictingBooking) {
-      return res
-        .status(400)
-        .json({ message: "Property is already booked for this date" });
+    if (conflictingBookings.length > 0) {
+      const formattedDates = conflictingBookings.map(booking => ({
+        from: booking.checkIn.toISOString().split('T')[0],
+        to: booking.checkOut.toISOString().split('T')[0]
+      }));
+      
+      return res.status(400).json({ 
+        message: "Property is already booked for some of the selected dates",
+        conflictingDates: formattedDates
+      });
     }
 
     const user = await userModel.findById(req.user._id);
@@ -53,6 +66,17 @@ module.exports.createBooking = async (req, res) => {
     res.status(200).json({ message: "Booking created successfully" });
   } catch (error) {
     console.error("Error in createBooking controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports.getPropertyBookings = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const bookings = await bookingModel.find({ propertyId: id });
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error in getPropertyBookings controller:", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
 };

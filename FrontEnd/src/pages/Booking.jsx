@@ -1,8 +1,19 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaCalendarAlt, FaUsers, FaCreditCard, FaLock, FaUser, FaEnvelope, FaPhone, FaSpinner, FaCheckCircle } from 'react-icons/fa';
-import { getPropertyById, createBooking } from '../services/User/UserApi';
+import { 
+  FaCalendarAlt, 
+  FaUsers, 
+  FaCreditCard, 
+  FaLock, 
+  FaUser, 
+  FaEnvelope, 
+  FaPhone, 
+  FaSpinner, 
+  FaCheckCircle, 
+  FaExclamationTriangle 
+} from 'react-icons/fa';
+import { getPropertyById, createBooking, getPropertyBookings } from '../services/User/UserApi';
 import { UserDataContext } from '../context/UserContex';
 
 function Booking() {
@@ -20,57 +31,29 @@ function Booking() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [numberOfNights, setNumberOfNights] = useState(0);
+  const [bookedDates, setBookedDates] = useState([]);
+  const [dateError, setDateError] = useState('');
   const { userData } = useContext(UserDataContext);
 
-  const handleBooking = async () => {
-    try {
-      setIsSubmitting(true);
-      const booking = await createBooking({
-        propertyId: id,
-        checkIn: bookingData.checkIn,
-        checkOut: bookingData.checkOut,
-        guests: bookingData.guests,
-        paymentMethod: bookingData.paymentMethod,
-        totalAmount: calculatePrices().total
-      });
-      
-      setShowSuccess(true);
-      
-      // Wait for 2 seconds to show success message before navigating
-      setTimeout(() => {
-        navigate(`/booking-confirmation/${booking.id}`, { 
-          state: { 
-            property,
-            bookingData,
-            numberOfNights,
-            prices: calculatePrices()
-          }
-        });
-      }, 2000);
-
-    } catch (error) {
-      console.error("Error creating booking:", error);
-      setErrors(prev => ({
-        ...prev,
-        submit: 'Failed to create booking. Please try again.'
-      }));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   useEffect(() => {
-    const fetchProperty = async () => {
+    const fetchPropertyAndBookings = async () => {
       try {
-        const propertyData = await getPropertyById(id);
+        const [propertyData, bookings] = await Promise.all([
+          getPropertyById(id),
+          getPropertyBookings(id)
+        ]);
         setProperty(propertyData);
+        setBookedDates(bookings.map(booking => ({
+          start: new Date(booking.checkIn),
+          end: new Date(booking.checkOut)
+        })));
       } catch (error) {
-        console.error("Error fetching property:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchProperty();
+    fetchPropertyAndBookings();
   }, [id]);
 
   useEffect(() => {
@@ -79,10 +62,27 @@ function Booking() {
       const checkOut = new Date(bookingData.checkOut);
       const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
       setNumberOfNights(nights > 0 ? nights : 0);
+      
+      // Check for date conflicts when dates change
+      if (isDateBooked(checkIn, checkOut)) {
+        setDateError('Selected dates are already booked');
+      } else {
+        setDateError('');
+      }
     } else {
       setNumberOfNights(0);
     }
-  }, [bookingData.checkIn, bookingData.checkOut]);
+  }, [bookingData.checkIn, bookingData.checkOut, bookedDates]);
+
+  const isDateBooked = (startDate, endDate) => {
+    return bookedDates.some(booking => {
+      return (
+        (startDate >= booking.start && startDate < booking.end) ||
+        (endDate > booking.start && endDate <= booking.end) ||
+        (startDate <= booking.start && endDate >= booking.end)
+      );
+    });
+  };
 
   const getTodayDate = () => {
     const today = new Date();
@@ -129,11 +129,14 @@ function Booking() {
     const today = new Date(getTodayDate());
     const checkIn = new Date(bookingData.checkIn);
     const checkOut = new Date(bookingData.checkOut);
+    setDateError('');
 
     if (!bookingData.checkIn) {
       newErrors.checkIn = 'Check-in date is required';
     } else if (checkIn < today) {
       newErrors.checkIn = 'Check-in date cannot be in the past';
+    } else if (isDateBooked(checkIn, checkOut)) {
+      setDateError('Selected dates are already booked');
     }
 
     if (!bookingData.checkOut) {
@@ -153,10 +156,55 @@ function Booking() {
     e.preventDefault();
     const newErrors = validateForm();
     
-    if (Object.keys(newErrors).length === 0) {
+    if (Object.keys(newErrors).length === 0 && !dateError) {
       await handleBooking();
     } else {
       setErrors(newErrors);
+    }
+  };
+
+  const handleBooking = async () => {
+    try {
+      setIsSubmitting(true);
+      const response = await createBooking({
+        propertyId: id,
+        checkIn: bookingData.checkIn,
+        checkOut: bookingData.checkOut,
+        guests: bookingData.guests,
+        paymentMethod: bookingData.paymentMethod,
+        totalAmount: calculatePrices().total
+      });
+      
+      if (response.conflictingDates) {
+        setDateError(`Property is booked from ${response.conflictingDates[0].from} to ${response.conflictingDates[0].to}`);
+        return;
+      }
+      
+      setShowSuccess(true);
+      
+      setTimeout(() => {
+        navigate(`/booking-confirmation/${response.booking._id}`, { 
+          state: { 
+            property,
+            bookingData,
+            numberOfNights,
+            prices: calculatePrices()
+          }
+        });
+      }, 2000);
+
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      if (error.response?.data?.conflictingDates) {
+        setDateError(`Property is booked from ${error.response.data.conflictingDates[0].from} to ${error.response.data.conflictingDates[0].to}`);
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          submit: 'Failed to create booking. Please try again.'
+        }));
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -232,7 +280,6 @@ function Booking() {
             </div>
           </div>
 
-          {/* User Details Section */}
           <div className="mb-8 p-6 bg-gray-50 rounded-xl">
             <h3 className="text-lg font-semibold mb-4">Guest Information</h3>
             <div className="space-y-4">
@@ -285,7 +332,6 @@ function Booking() {
                 )}
               </div>
 
-              {/* Check-out Date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Check-out Date
@@ -308,7 +354,6 @@ function Booking() {
                 )}
               </div>
 
-              {/* Number of Guests */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Number of Guests
@@ -328,7 +373,6 @@ function Booking() {
                 </div>
               </div>
 
-              {/* Payment Method */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Payment Method
@@ -355,7 +399,18 @@ function Booking() {
               </div>
             </div>
 
-            {/* Price Breakdown */}
+            {dateError && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4">
+                <div className="flex items-center">
+                  <FaExclamationTriangle className="text-red-500 mr-3" />
+                  <div>
+                    <p className="text-sm text-red-700">{dateError}</p>
+                    <p className="text-xs text-red-600 mt-1">We are sorry, the property is already booked for the selected dates.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="mt-8 p-6 bg-gray-50 rounded-xl">
               <h3 className="text-lg font-semibold mb-4">Price Details</h3>
               <div className="space-y-3">
@@ -393,12 +448,12 @@ function Booking() {
 
             <motion.button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || dateError}
               className={`w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-4 rounded-xl font-medium shadow-lg ${
-                isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                isSubmitting || dateError ? 'opacity-75 cursor-not-allowed' : ''
               }`}
-              whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-              whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+              whileHover={{ scale: isSubmitting || dateError ? 1 : 1.02 }}
+              whileTap={{ scale: isSubmitting || dateError ? 1 : 0.98 }}
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center">

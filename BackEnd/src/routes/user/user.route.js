@@ -83,4 +83,6 @@ router.get('/my-bookings', authMiddleware.isAuthenticated, bookingController.get
 
 router.delete('/my-bookings/:id', authMiddleware.isAuthenticated, bookingController.deleteBooking);
 
+router.get('/property/:id/bookings', authMiddleware.isAuthenticated, bookingController.getPropertyBookings);
+
 module.exports = router;

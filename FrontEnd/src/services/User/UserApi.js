@@ -231,6 +231,19 @@ export const createBooking = async (formData) => {
   }
 };
 
+export const getPropertyBookings = async (id) => {
+  try {
+    const response = await api.get(`/property/${id}/bookings`);
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch property bookings. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
 export const getMyBookings = async () => {
   try {
     const response = await api.get("/my-bookings");
