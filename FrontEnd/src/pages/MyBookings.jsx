@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaMoneyBillWave, FaCheckCircle, FaSpinner } from 'react-icons/fa';
+import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaMoneyBillWave, FaCheckCircle, FaSpinner, FaStar, FaTimes } from 'react-icons/fa';
 import { getMyBookings } from '../services/User/UserApi';
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, upcoming, past
+  const [filter, setFilter] = useState('all');
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [review, setReview] = useState({
+    rating: 0,
+    comment: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -31,7 +38,10 @@ function MyBookings() {
       case 'past':
         return bookings.filter(booking => new Date(booking.checkOut) < today);
       default:
-        return bookings;
+        return bookings.filter(booking => {
+          const checkOut = new Date(booking.checkOut);
+          return checkOut >= today;
+        });
     }
   };
 
@@ -43,6 +53,42 @@ function MyBookings() {
     if (today < startDate) return 'bg-blue-100 text-blue-800'; // Upcoming
     if (today > endDate) return 'bg-gray-100 text-gray-800'; // Past
     return 'bg-green-100 text-green-800'; // Active
+  };
+
+  const handleReviewClick = (booking) => {
+    setSelectedBooking(booking);
+    setShowReviewModal(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (review.rating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Update the booking in state to show it's been reviewed
+      const updatedBookings = bookings.map(booking => 
+        booking._id === selectedBooking._id 
+          ? { ...booking, hasReview: true }
+          : booking
+      );
+      setBookings(updatedBookings);
+      
+      // Reset and close modal
+      setReview({ rating: 0, comment: '' });
+      setSelectedBooking(null);
+      setShowReviewModal(false);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Failed to submit review. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -156,13 +202,20 @@ function MyBookings() {
                           <FaCheckCircle className="w-5 h-5 mr-2" />
                           <span>Booking Confirmed</span>
                         </div>
-                        <motion.button
-                          className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          View Details
-                        </motion.button>
+                        {filter === 'past' && !booking.hasReview && (
+                          <motion.button
+                            onClick={() => handleReviewClick(booking)}
+                            className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium flex items-center"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <FaStar className="mr-2" />
+                            Write Review
+                          </motion.button>
+                        )}
+                        {filter === 'past' && booking.hasReview && (
+                          <span className="text-gray-500 italic">Review submitted</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -190,6 +243,92 @@ function MyBookings() {
           )}
         </div>
       </div>
+
+      {/* Review Modal */}
+      <AnimatePresence>
+        {showReviewModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 max-w-lg w-full"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Write a Review</h3>
+                <button
+                  onClick={() => setShowReviewModal(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <FaTimes className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-600 mb-2">Rate your experience</p>
+                <div className="flex space-x-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <motion.button
+                      key={star}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setReview({ ...review, rating: star })}
+                      className={`text-2xl ${
+                        star <= review.rating ? 'text-yellow-400' : 'text-gray-300'
+                      }`}
+                    >
+                      <FaStar />
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-gray-700 mb-2">Your Review</label>
+                <textarea
+                  value={review.comment}
+                  onChange={(e) => setReview({ ...review, comment: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="Share your experience..."
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowReviewModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSubmitReview}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg flex items-center"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <FaSpinner className="animate-spin mr-2" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Review'
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

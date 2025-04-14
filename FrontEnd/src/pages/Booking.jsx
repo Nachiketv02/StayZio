@@ -183,7 +183,7 @@ function Booking() {
       setShowSuccess(true);
       
       setTimeout(() => {
-        navigate(`/booking-confirmation/${response.booking._id}`, { 
+        navigate(`/booking-confirmation`, { 
           state: { 
             property,
             bookingData,
