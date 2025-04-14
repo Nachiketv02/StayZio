@@ -68,7 +68,6 @@ function Properties() {
     }
 
     try {
-      // Check if property exists in favorites (using both possible structures)
       const isFavorite = favorites.some(
         (fav) =>
           fav._id === property._id || fav.propertyId?._id === property._id
@@ -79,8 +78,7 @@ function Properties() {
         removeFromStore(property._id);
         toast.success("Removed from favorites");
       } else {
-        const response = await addFavorite(property._id);
-        // Use the response data to update store if needed
+        await addFavorite(property._id);
         addToStore(property);
         toast.success("Added to favorites");
       }
@@ -89,7 +87,6 @@ function Properties() {
       toast.error(
         error.response?.data?.message || "Failed to update favorites"
       );
-      // Refresh favorites from server on error
       if (isAuthenticated) {
         const updatedFavorites = await getFavorites();
         setFavorites(updatedFavorites);
@@ -110,8 +107,6 @@ function Properties() {
         setFavorites([]);
       }
     };
-
-    // Sync on mount and when authentication changes
     syncFavorites();
   }, [isAuthenticated, setFavorites]);
 
@@ -133,11 +128,15 @@ function Properties() {
   }, []);
 
   const filteredProperties = properties.filter((property) => {
-    if (
-      filters.location &&
-      !property.location.toLowerCase().includes(filters.location.toLowerCase())
-    ) {
-      return false;
+    if (filters.location) {
+      const search = filters.location.toLowerCase();
+      const inTitle = property.title?.toLowerCase().includes(search);
+      const inLocation = property.location?.toLowerCase().includes(search);
+      const inCountry = property.country?.toLowerCase().includes(search);
+    
+      if (!inTitle && !inLocation && !inCountry) {
+        return false;
+      }
     }
     if (
       filters.propertyType !== "all" &&

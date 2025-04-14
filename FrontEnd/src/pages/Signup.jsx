@@ -136,7 +136,11 @@ function Signup() {
         }, 2000);
       } catch (error) {
         console.error('Error registering user:', error);
-        setErrors({ submit: error.response.data.message });
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          'Something went wrong. Please try again.';
+        setErrors({ submit: message });
       } finally {
         setIsLoading(false);
       }
