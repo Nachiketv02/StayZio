@@ -36,7 +36,7 @@ function PublicLayout() {
         <Route path="/" element={<Home />} />
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/experiences" element={<Experiences />} />
-        <Route path="/properties" element={<Properties />} />
+        <Route path="/properties" element={<ProtectedRoute><Properties /></ProtectedRoute>} />
         <Route path="/properties/:id" element={<ProtectedRoute><PropertyDetails /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

@@ -26,6 +26,7 @@ import {
   removeFavorite,
   getFavorites,
 } from "../services/User/UserApi";
+import {useLocation} from "react-router-dom";
 import { UserDataContext } from "../context/UserContex";
 
 function Properties() {
@@ -38,6 +39,9 @@ function Properties() {
     propertyType: "all",
     amenities: [],
   });
+
+  const location = useLocation();
+  const searchParams = location.state?.searchParams || {};
 
   const {
     favorites,
@@ -137,6 +141,9 @@ function Properties() {
       if (!inTitle && !inLocation && !inCountry) {
         return false;
       }
+    }
+    if (searchParams.location && !property.location.toLowerCase().includes(searchParams.location.toLowerCase()) && !property.country.toLowerCase().includes(searchParams.location.toLowerCase())) {
+      return false;
     }
     if (
       filters.propertyType !== "all" &&

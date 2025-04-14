@@ -20,6 +20,7 @@ import {
 import { getPropertyById, getPropertyReviews, deleteReview } from "../services/User/UserApi";
 import { useNavigate } from "react-router-dom";
 import { UserDataContext } from "../context/UserContex";
+import PropertyMap from "../components/PropertyMap";
 
 const amenityIcons = {
   WiFi: FaWifi,
@@ -195,10 +196,21 @@ function PropertyDetails() {
               <p className="text-gray-600">{property.description}</p>
             </motion.div>
 
+            {/* Location Map
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
+              className="space-y-4"
+            >
+              <h2 className="text-2xl font-semibold">Location</h2>
+              <PropertyMap location={property.location} title={property.title} />
+            </motion.div> */}
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
             >
               <h2 className="text-2xl font-semibold mb-4">
                 What this place offers
@@ -220,7 +232,7 @@ function PropertyDetails() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.5 }}
               >
                 <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
                 <div className="space-y-6">

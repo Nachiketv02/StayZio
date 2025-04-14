@@ -6,29 +6,45 @@ import {
   useTransform,
   AnimatePresence,
 } from "framer-motion";
-import { 
-  FaSearch, FaMapMarkerAlt, FaCalendarAlt, FaUsers, FaHeart, 
-  FaStar, FaGlobe, FaShieldAlt, FaUserCheck, 
-  FaHandshake, FaCrown, FaAward, FaArrowRight, FaPlane,
-  FaQuoteLeft, FaApple, FaGooglePlay, FaCheck
-} from 'react-icons/fa';
+import {
+  FaSearch,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaUsers,
+  FaHeart,
+  FaStar,
+  FaGlobe,
+  FaShieldAlt,
+  FaUserCheck,
+  FaHandshake,
+  FaCrown,
+  FaAward,
+  FaArrowRight,
+  FaPlane,
+  FaQuoteLeft,
+  FaApple,
+  FaGooglePlay,
+  FaCheck,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function Home() {
   const [searchParams, setSearchParams] = useState({
-    location: "",
-    dates: "",
-    guests: "",
+    location: '',
+    checkIn: '',
+    daysOfStay: 1,
+    guests: 1
   });
 
   const navigate = useNavigate();
 
   const handleAppStoreClick = () => {
-    navigate('/coming-soon');
+    navigate("/coming-soon");
   };
 
   const handlePlayStoreClick = () => {
-    navigate('/coming-soon');
+    navigate("/coming-soon");
   };
 
   const heroBackgrounds = [
@@ -161,6 +177,20 @@ function Home() {
     },
   ];
 
+  const handleSearch = () => {
+    if (!searchParams.location.trim()) {
+      toast.error("Please enter a location");
+      return;
+    }
+    navigate("/properties", {
+      state: {
+        searchParams: {
+          ...searchParams,
+        },
+      },
+    });
+  };
+
   const testimonials = [
     {
       id: 1,
@@ -268,6 +298,7 @@ function Home() {
                   Find Your Perfect Stay
                 </h2>
                 <div className="space-y-4">
+                  {/* Location Search */}
                   <div className="relative">
                     <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -283,49 +314,78 @@ function Home() {
                       }
                     />
                   </div>
-                  <div className="relative">
-                    <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="When are you planning to stay?"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
-                      value={searchParams.dates}
-                      onChange={(e) =>
-                        setSearchParams({
-                          ...searchParams,
-                          dates: e.target.value,
-                        })
-                      }
-                    />
+
+                  {/* Date Range Picker */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="date"
+                        placeholder="Check-in"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
+                        value={searchParams.checkIn}
+                        onChange={(e) =>
+                          setSearchParams({
+                            ...searchParams,
+                            checkIn: e.target.value,
+                          })
+                        }
+                        min={new Date().toISOString().split("T")[0]} // Disable past dates
+                      />
+                    </div>
+                    <div className="relative">
+                      <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="date"
+                        placeholder="Check-out"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
+                        value={searchParams.checkOut}
+                        onChange={(e) =>
+                          setSearchParams({
+                            ...searchParams,
+                            checkOut: e.target.value,
+                          })
+                        }
+                        min={
+                          searchParams.checkIn ||
+                          new Date().toISOString().split("T")[0]
+                        }
+                      />
+                    </div>
                   </div>
+
+                  {/* Guests Selector */}
                   <div className="relative">
                     <FaUsers className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Number of guests"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
+                    <select
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all appearance-none"
                       value={searchParams.guests}
                       onChange={(e) =>
                         setSearchParams({
                           ...searchParams,
-                          guests: e.target.value,
+                          guests: parseInt(e.target.value),
                         })
                       }
-                    />
-                  </div>
-                  <Link to="/properties">
-                    <motion.button
-                      className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-4 rounded-xl font-medium text-lg shadow-lg mt-5"
-                      whileHover={{
-                        scale: 1.02,
-                        boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1)",
-                      }}
-                      whileTap={{ scale: 0.98 }}
                     >
-                      <FaSearch className="inline-block mr-2" />
-                      Search Properties
-                    </motion.button>
-                  </Link>
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                        <option key={num} value={num}>
+                          {num} {num === 1 ? "guest" : "guests"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <motion.button
+                    className="w-full bg-gradient-to-r from-primary-600 to-primary-500 text-white py-4 rounded-xl font-medium text-lg shadow-lg mt-5"
+                    whileHover={{
+                      scale: 1.02,
+                      boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1)",
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSearch}
+                  >
+                    <FaSearch className="inline-block mr-2" />
+                    Search Properties
+                  </motion.button>
                 </div>
               </div>
             </motion.div>
@@ -338,11 +398,11 @@ function Home() {
         {/* Background Pattern */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-black/10"></div>
-          <div 
+          <div
             className="absolute inset-0 opacity-10"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-              backgroundSize: '60px 60px'
+              backgroundSize: "60px 60px",
             }}
           ></div>
         </div>
@@ -383,9 +443,7 @@ function Home() {
                 <p className="text-lg font-semibold text-white mb-2">
                   {stat.label}
                 </p>
-                <p className="text-white/80 text-sm">
-                  {stat.subtext}
-                </p>
+                <p className="text-white/80 text-sm">{stat.subtext}</p>
               </motion.div>
             ))}
           </div>

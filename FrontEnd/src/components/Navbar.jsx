@@ -196,7 +196,7 @@ function Navbar() {
                   className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all border ${
                     isHeroSection
                       ? "text-white border-blue-400 bg-blue-400/10 hover:bg-blue-400/20"
-                      : "text-blue-600 border-blue-400 bg-blue-50 hover:bg-blue-100"
+                      : "text-primary-600 border-blue-400 bg-blue-50 hover:bg-blue-100"
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
