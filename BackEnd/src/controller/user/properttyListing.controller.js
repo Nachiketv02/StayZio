@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const propertyListingModel = require("../../model/user/propertyListing.model");
 const userModel = require("../../model/user/user.model");
 
+
 module.exports.listProperty = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {

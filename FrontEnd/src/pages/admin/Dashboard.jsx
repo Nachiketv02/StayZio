@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { FaUsers, FaHome, FaChartBar, FaCalendarAlt, FaBell, FaCog, FaSignOutAlt } from 'react-icons/fa'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import Properties from './Properties'
+import Users from './Users'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -195,6 +196,7 @@ function Dashboard() {
         <Routes>
           <Route path="/" element={renderOverview()} />
           <Route path="/properties" element={<Properties />} />
+          <Route path="/users" element={<Users />} />
           {/* Add other routes here */}
         </Routes>
       </div>

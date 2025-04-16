@@ -57,7 +57,8 @@ function MyProperties() {
 
   const filteredProperties = properties.filter(property => {
     return property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           property.location.toLowerCase().includes(searchTerm.toLowerCase());
+           property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           property.country.toLowerCase().includes(searchTerm.toLowerCase());
   }).sort((a, b) => {
     switch (sortBy) {
       case 'price-high':
@@ -68,7 +69,7 @@ function MyProperties() {
         return b.rating - a.rating;
       case 'oldest':
         return new Date(a.lastUpdated) - new Date(b.lastUpdated);
-      default: // newest
+      default:
         return new Date(b.lastUpdated) - new Date(a.lastUpdated);
     }
   });

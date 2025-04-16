@@ -23,6 +23,7 @@ import EditProperty from './pages/EditProperty';
 import Booking from './pages/Booking';
 import BookingConfirmation from './pages/BookingConfirmation';
 import MyBookings from './pages/MyBookings';
+import Users from './pages/admin/Users';
 import { Toaster } from 'react-hot-toast'
 
 function PublicLayout() {
