@@ -171,7 +171,6 @@ function MyBookings() {
           </p>
         </motion.div>
 
-        {/* Filter Tabs */}
         <div className="flex space-x-4 mb-8 overflow-x-auto pb-2">
           {["active", "upcoming", "past", "cancelled"].map((filterType) => (
             <motion.button
@@ -190,7 +189,6 @@ function MyBookings() {
           ))}
         </div>
 
-        {/* Bookings List */}
         <div className="space-y-6">
           <AnimatePresence>
             {getFilteredBookings().map((booking, index) => (
@@ -357,7 +355,6 @@ function MyBookings() {
           )}
         </div>
 
-        {/* Cancel Booking Modal */}
         <AnimatePresence>
           {showCancelModal && (
             <motion.div
@@ -435,7 +432,6 @@ function MyBookings() {
           )}
         </AnimatePresence>
 
-        {/* Review Modal */}
         <AnimatePresence>
           {showReviewModal && (
             <motion.div

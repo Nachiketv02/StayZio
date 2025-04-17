@@ -119,7 +119,6 @@ function ResetPassword() {
               </div>
 
               <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-                {/* New Password Field */}
                 <div>
                   <label
                     htmlFor="password"
@@ -155,7 +154,6 @@ function ResetPassword() {
                   </div>
                 </div>
 
-                {/* Confirm Password Field */}
                 <div>
                   <label
                     htmlFor="confirmPassword"

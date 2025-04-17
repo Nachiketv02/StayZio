@@ -21,7 +21,7 @@ function Login() {
       ...prev,
       [name]: value
     }))
-    setServerError(''); // clear server error when user types
+    setServerError(''); 
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,

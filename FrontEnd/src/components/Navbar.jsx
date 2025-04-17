@@ -103,7 +103,6 @@ function Navbar() {
             </Link>
           </motion.div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center justify-center flex-1 mx-10 space-x-8">
             <Link to="/destinations">
               <motion.span
@@ -151,7 +150,6 @@ function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/favorites">
               <motion.div
@@ -287,7 +285,6 @@ function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <motion.div className="md:hidden" whileTap={{ scale: 0.9 }}>
             <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isAuthenticated ? (
@@ -320,7 +317,6 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div

@@ -60,7 +60,6 @@ function BookingConfirmation() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl shadow-xl p-8"
         >
-          {/* Success Message */}
           <div className="text-center mb-8">
             <motion.div
               initial={{ scale: 0 }}
@@ -77,9 +76,7 @@ function BookingConfirmation() {
             </p>
           </div>
 
-          {/* Receipt Section */}
           <div ref={receiptRef} className="bg-white p-6 rounded-xl">
-            {/* Property Details */}
             <div className="border-t border-b border-gray-200 py-6 mb-6">
               <div className="flex items-center">
                 <img
@@ -97,7 +94,6 @@ function BookingConfirmation() {
               </div>
             </div>
 
-            {/* Booking Details */}
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               {bookingDetails.map((detail, index) => (
                 <motion.div
@@ -116,7 +112,6 @@ function BookingConfirmation() {
               ))}
             </div>
 
-            {/* Price Summary */}
             <div className="bg-gray-50 rounded-xl p-6">
               <h3 className="text-lg font-semibold mb-4">Price Summary</h3>
               <div className="space-y-3">
@@ -142,7 +137,6 @@ function BookingConfirmation() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
             <motion.button
               onClick={() => navigate('/')}

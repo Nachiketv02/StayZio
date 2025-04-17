@@ -133,7 +133,6 @@ function Properties() {
   }, []);
 
   const filteredProperties = properties.filter((property) => {
-    // Handle location filter from search input
     if (filters.location) {
       const search = filters.location.toLowerCase();
       const inTitle = property.title?.toLowerCase().includes(search);
@@ -144,7 +143,7 @@ function Properties() {
         return false;
       }
     }
-    // Handle country filter from home page
+    
     else if (searchParams.location) {
       const search = searchParams.location.toLowerCase();
       const inLocation = property.location?.toLowerCase().includes(search);

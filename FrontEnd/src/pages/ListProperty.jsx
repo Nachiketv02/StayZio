@@ -827,7 +827,6 @@ function ListProperty() {
               )}
             </AnimatePresence>
 
-            {/* Navigation Buttons */}
             <div className="flex justify-between pt-6">
               {currentStep > 1 && (
                 <motion.button

@@ -329,7 +329,6 @@ function Booking() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Check-in Date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Check-in Date

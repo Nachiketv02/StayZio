@@ -19,18 +19,15 @@ function ComingSoon() {
         <span>Go Back</span>
       </motion.button>
 
-      {/* Main Content Container */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="w-full max-w-2xl bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 text-center relative overflow-hidden mx-4" 
       >
-        {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full translate-y-1/2 -translate-x-1/2" />
 
-        {/* Phone Icon */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -40,7 +37,6 @@ function ComingSoon() {
           <Smartphone className="w-16 h-16 text-white mx-auto" />
         </motion.div>
 
-        {/* Heading and Description */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Coming Soon!</h1>
           <p className="text-lg md:text-xl text-white/90 max-w-lg mx-auto">
@@ -48,7 +44,6 @@ function ComingSoon() {
           </p>
         </div>
 
-        {/* Info Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             {
@@ -81,7 +76,6 @@ function ComingSoon() {
           ))}
         </div>
 
-        {/* Email Input */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -44,7 +44,6 @@ function BecomeHost() {
 
   return (
     <div className="min-h-screen pt-20">
-      {/* Hero Section */}
       <div className="relative h-[80vh] bg-gradient-to-r from-primary-600 to-primary-500 overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
@@ -79,7 +78,6 @@ function BecomeHost() {
         </div>
       </div>
 
-      {/* Benefits Section */}
       <div className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
@@ -113,7 +111,6 @@ function BecomeHost() {
         </div>
       </div>
 
-      {/* How It Works */}
       <div className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
@@ -147,7 +144,6 @@ function BecomeHost() {
         </div>
       </div>
 
-      {/* Host Protection */}
       <div className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -196,7 +192,6 @@ function BecomeHost() {
         </div>
       </div>
 
-      {/* CTA Section */}
       <div className="py-24 bg-gradient-to-r from-primary-600 to-primary-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div

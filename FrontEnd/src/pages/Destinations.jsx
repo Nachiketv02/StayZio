@@ -44,7 +44,6 @@ function Destinations() {
 
   return (
     <div className="min-h-screen pt-20 bg-gray-50">
-      {/* Hero Section */}
       <div className="relative h-[60vh] bg-black">
         <img
           src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80"
@@ -72,7 +71,6 @@ function Destinations() {
         </div>
       </div>
 
-      {/* Destinations Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {destinations.map((destination, index) => (
@@ -84,7 +82,6 @@ function Destinations() {
               transition={{ delay: index * 0.1 }}
               className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-full"
             >
-              {/* Image with overlay */}
               <div className="relative h-64 shrink-0">
                 <img
                   src={destination.image}
@@ -110,9 +107,7 @@ function Destinations() {
                 </div>
               </div>
 
-              {/* Content */}
               <div className="p-6 flex flex-col flex-1">
-                {/* Properties and reviews */}
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center">
                     <FaPlane className="text-primary-500 w-5 h-5 mr-2" />
@@ -125,12 +120,10 @@ function Destinations() {
                   </span>
                 </div>
 
-                {/* Description */}
                 <p className="text-gray-600 mb-5 line-clamp-3">
                   {destination.description}
                 </p>
 
-                {/* Highlights */}
                 <div className="mb-5">
                   <h4 className="text-sm font-semibold text-gray-500 mb-2">
                     Highlights
@@ -147,7 +140,6 @@ function Destinations() {
                   </div>
                 </div>
 
-                {/* Activities */}
                 <div className="mb-6">
                   <h4 className="text-sm font-semibold text-gray-500 mb-2">
                     Popular Activities
@@ -164,7 +156,6 @@ function Destinations() {
                   </div>
                 </div>
 
-                {/* Button - pushed to bottom */}
                 <div className="mt-auto">
                   <Link to={`/properties?destination=${destination.name}`}>
                     <motion.button

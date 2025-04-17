@@ -9,15 +9,14 @@ function PropertyMap({ location, title }) {
   useEffect(() => {
     const initMap = async () => {
       const loader = new Loader({
-        apiKey: 'YOUR_GOOGLE_MAPS_API_KEY', // Replace with your API key
+        apiKey: 'YOUR_GOOGLE_MAPS_API_KEY',
         version: 'weekly',
       });
 
       try {
         const google = await loader.load();
         
-        // For demo purposes, using a default location if geocoding is not available
-        const defaultPosition = { lat: 40.7128, lng: -74.0060 }; // New York City
+        const defaultPosition = { lat: 40.7128, lng: -74.0060 };
 
         const map = new google.maps.Map(mapRef.current, {
           center: defaultPosition,
@@ -55,7 +54,6 @@ function PropertyMap({ location, title }) {
 
         googleMapRef.current = map;
 
-        // Create a marker
         const marker = new google.maps.Marker({
           position: defaultPosition,
           map: map,
@@ -65,7 +63,6 @@ function PropertyMap({ location, title }) {
 
         markerRef.current = marker;
 
-        // Create an info window
         const infoWindow = new google.maps.InfoWindow({
           content: `
             <div class="p-2">
@@ -75,12 +72,10 @@ function PropertyMap({ location, title }) {
           `
         });
 
-        // Add click listener to marker
         marker.addListener('click', () => {
           infoWindow.open(map, marker);
         });
 
-        // Try to geocode the location
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ address: location }, (results, status) => {
           if (status === 'OK' && results[0]) {

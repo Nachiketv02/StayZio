@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   motion,
-  useScroll,
-  useTransform,
   AnimatePresence,
 } from "framer-motion";
 import {
@@ -235,7 +233,6 @@ function Home() {
 
   return (
     <div className="overflow-x-hidden">
-      {/* Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center">
         <AnimatePresence mode="wait">
           <motion.div
@@ -315,7 +312,6 @@ function Home() {
                     />
                   </div>
 
-                  {/* Date Range Picker */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="relative">
                       <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -330,7 +326,7 @@ function Home() {
                             checkIn: e.target.value,
                           })
                         }
-                        min={new Date().toISOString().split("T")[0]} // Disable past dates
+                        min={new Date().toISOString().split("T")[0]}
                       />
                     </div>
                     <div className="relative">
@@ -354,7 +350,6 @@ function Home() {
                     </div>
                   </div>
 
-                  {/* Guests Selector */}
                   <div className="relative">
                     <FaUsers className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <select
@@ -393,9 +388,7 @@ function Home() {
         </div>
       </div>
 
-      {/* Stats Section */}
       <div className="py-24 relative overflow-hidden bg-gradient-to-r from-primary-600 to-primary-500">
-        {/* Background Pattern */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-black/10"></div>
           <div
@@ -450,7 +443,6 @@ function Home() {
         </div>
       </div>
 
-      {/* Explore by country Section */}
       <div className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -568,9 +560,7 @@ function Home() {
         </div>
       </div>
 
-      {/* CTA Section */}
       <div className="relative py-24 bg-gradient-to-b from-gray-50 to-white">
-        {/* Decorative Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-100 rounded-full opacity-20 blur-3xl"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary-200 rounded-full opacity-20 blur-3xl"></div>
@@ -578,7 +568,6 @@ function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Testimonials Section */}
             <div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -643,7 +632,6 @@ function Home() {
               </div>
             </div>
 
-            {/* App Download Section */}
             <div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

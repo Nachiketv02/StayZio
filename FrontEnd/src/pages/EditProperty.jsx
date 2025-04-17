@@ -208,8 +208,6 @@ function EditProperty() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate form fields first
     const newErrors = validateForm();
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
@@ -229,9 +227,6 @@ function EditProperty() {
       const formDataToSend = new FormData();
       console.log('Form data before submit:', formData);
 
-
-
-      // 1. Append all non-image fields
       Object.keys(formData).forEach((key) => {
         if (
           key !== "existingImages" &&
@@ -242,24 +237,18 @@ function EditProperty() {
         }
       });
 
-      // 2. Append amenities
       formData.amenities.forEach((amenity) => {
         formDataToSend.append("amenities[]", amenity);
       });
 
-      // 3. Handle images:
-      // - Always send existing images (even if unchanged)
       formDataToSend.append(
         "existingImages",
         JSON.stringify(formData.existingImages)
       );
-
-      // - Append new images if any were added
       formData.newImages.forEach((image) => {
-        formDataToSend.append("images", image); // Matches Multer's expected field name
+        formDataToSend.append("images", image);
       });
 
-      // 4. Send the request
       const response = await updateProperty(id, formDataToSend);
       console.log("edit", response);
       if (response) {
@@ -506,7 +495,6 @@ function EditProperty() {
                 )}
               </div>
 
-              {/* Bathrooms Input Field */}
               <div>
                 <label className="block text-lg font-medium text-gray-700 mb-2">
                   Bathrooms
