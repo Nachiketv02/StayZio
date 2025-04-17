@@ -268,14 +268,14 @@ function PropertyDetails() {
                       </div>
                       <p className="text-gray-600 mb-3">{review.comment}</p>
 
-                      <div className="flex items-center text-sm text-primary-600">
+                      {/* <div className="flex items-center text-sm text-primary-600">
                         <FaCalendarAlt className="mr-2" />
                         <span>
                           Verified stay - (
-                          {formatDate(review.bookingId.checkIn)} -{" "}
-                          {formatDate(review.bookingId.checkOut)})
+                          {formatDate(review.bookingId.checkIn)} - {" "}
+                          {formatDate(review.bookingId.checkOut)} || {})
                         </span>
-                      </div>
+                      </div> */}
 
                       {/* Delete Confirmation Modal */}
                       <AnimatePresence>

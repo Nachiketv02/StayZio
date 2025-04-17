@@ -6,9 +6,9 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const connectDB = require("./db/db");
 const userRoute = require("./routes/user/user.route");
-const propertyListingModel = require("./model/user/propertyListing.model");
 
 connectDB();
+require("./automation/booking.automation");
 
 app.use(cors({
     origin: "http://localhost:5173",

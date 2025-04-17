@@ -43,7 +43,9 @@ function Booking() {
           getPropertyBookings(id)
         ]);
         setProperty(propertyData);
-        setBookedDates(bookings.map(booking => ({
+        
+        const confirmedBookings = bookings.filter(booking => booking.status === 'confirmed');
+        setBookedDates(confirmedBookings.map(booking => ({
           start: new Date(booking.checkIn),
           end: new Date(booking.checkOut)
         })));
@@ -53,7 +55,11 @@ function Booking() {
         setIsLoading(false);
       }
     };
+    
     fetchPropertyAndBookings();
+    
+    const interval = setInterval(fetchPropertyAndBookings, 30000);
+    return () => clearInterval(interval);
   }, [id]);
 
   useEffect(() => {
@@ -63,7 +69,6 @@ function Booking() {
       const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
       setNumberOfNights(nights > 0 ? nights : 0);
       
-      // Check for date conflicts when dates change
       if (isDateBooked(checkIn, checkOut)) {
         setDateError('Selected dates are already booked');
       } else {
@@ -75,11 +80,16 @@ function Booking() {
   }, [bookingData.checkIn, bookingData.checkOut, bookedDates]);
 
   const isDateBooked = (startDate, endDate) => {
+    if (!bookedDates.length) return false;
+    
     return bookedDates.some(booking => {
+      const bookingStart = new Date(booking.start);
+      const bookingEnd = new Date(booking.end);
+      
       return (
-        (startDate >= booking.start && startDate < booking.end) ||
-        (endDate > booking.start && endDate <= booking.end) ||
-        (startDate <= booking.start && endDate >= booking.end)
+        (startDate >= bookingStart && startDate < bookingEnd) ||
+        (endDate > bookingStart && endDate <= bookingEnd) ||
+        (startDate <= bookingStart && endDate >= bookingEnd)
       );
     });
   };
@@ -135,14 +145,17 @@ function Booking() {
       newErrors.checkIn = 'Check-in date is required';
     } else if (checkIn < today) {
       newErrors.checkIn = 'Check-in date cannot be in the past';
-    } else if (isDateBooked(checkIn, checkOut)) {
-      setDateError('Selected dates are already booked');
     }
 
     if (!bookingData.checkOut) {
       newErrors.checkOut = 'Check-out date is required';
     } else if (checkOut <= checkIn) {
       newErrors.checkOut = 'Check-out date must be after check-in date';
+    }
+
+    // Check for date conflicts only if dates are valid
+    if (!newErrors.checkIn && !newErrors.checkOut && isDateBooked(checkIn, checkOut)) {
+      setDateError('Selected dates are already booked');
     }
 
     if (!bookingData.paymentMethod) {
@@ -179,6 +192,13 @@ function Booking() {
         setDateError(`Property is booked from ${response.conflictingDates[0].from} to ${response.conflictingDates[0].to}`);
         return;
       }
+
+      const updatedBookings = await getPropertyBookings(id);
+      const confirmedBookings = updatedBookings.filter(booking => booking.status === 'confirmed');
+      setBookedDates(confirmedBookings.map(booking => ({
+        start: new Date(booking.checkIn),
+        end: new Date(booking.checkOut)
+      })));
       
       setShowSuccess(true);
       

@@ -27,6 +27,7 @@ module.exports.createBooking = async (req, res) => {
 
     const conflictingBookings = await bookingModel.find({
       propertyId,
+      status : "confirmed",
       $or: [
         {
           checkIn: { $lt: checkOutDate },
@@ -34,6 +35,7 @@ module.exports.createBooking = async (req, res) => {
         }
       ]
     });
+
     if (conflictingBookings.length > 0) {
       const formattedDates = conflictingBookings.map(booking => ({
         from: booking.checkIn.toISOString().split('T')[0],
@@ -60,6 +62,7 @@ module.exports.createBooking = async (req, res) => {
       propertyId,
       userId: user._id,
     });
+    booking.status = 'confirmed';
 
     await booking.save();
 
@@ -103,8 +106,9 @@ module.exports.deleteBooking = async (req, res) => {
         .status(403)
         .json({ message: "Unauthorized to delete this booking" });
     }
-    await booking.deleteOne();
-    res.status(200).json({ message: "Booking deleted successfully" });
+    booking.status = 'cancelled';
+    await booking.save();
+    res.status(200).json({ message: "Booking cancelled successfully" });
   } catch (error) {
     console.error("Error in deleteBooking controller:", error.message);
     res.status(500).json({ message: "Internal server error" });

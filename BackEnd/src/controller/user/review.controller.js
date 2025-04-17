@@ -14,26 +14,27 @@ module.exports.createReview = async (req, res) => {
     const { propertyId, bookingId, rating, comment } = req.body;
     const userId = req.user._id;
 
-    // Check if booking exists and belongs to user
+    // Check if booking exists, belongs to user, and is completed
     const booking = await bookingModel.findOne({
       _id: bookingId,
       userId,
       propertyId,
+      status: 'completed' // Add status check
     });
 
     if (!booking) {
-      return res
-        .status(404)
-        .json({ message: "Booking not found or doesn't belong to you" });
-    }
-
-    // Check if booking has ended
-    const today = new Date();
-    if (new Date(booking.checkOut) > today) {
-      return res.status(400).json({
-        message: "You can only review after your booking period has ended",
+      return res.status(404).json({ 
+        message: "Booking not found, doesn't belong to you, or isn't completed" 
       });
     }
+
+    // Remove date check since we're using status now
+    // const today = new Date();
+    // if (new Date(booking.checkOut) > today) {
+    //   return res.status(400).json({
+    //     message: "You can only review after your booking period has ended",
+    //   });
+    // }
 
     // Check if user already reviewed this booking
     const existingReview = await reviewModel.findOne({ bookingId });

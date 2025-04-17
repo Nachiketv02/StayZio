@@ -36,7 +36,6 @@ export const verifyOTP = async (email, verificationCode ) => {
 export const login = async (formData) => {
   try {
     const response = await api.post("/login", formData);
-    console.log(response);
     return response.data;
   } catch (error) {
     console.error('Login error:', error);
@@ -247,6 +246,7 @@ export const getPropertyBookings = async (id) => {
 export const getMyBookings = async () => {
   try {
     const response = await api.get("/my-bookings");
+    console.log(response.data.bookings);
     return response.data.bookings;
   } catch (error) {
     const errorMessage =
@@ -329,7 +329,6 @@ export const addFavorite = async (propertyId) => {
 export const getFavorites = async () => {
   try {
     const response = await api.get("/favorite");
-    console.log(response.data);
     return response.data.favorites;
   } catch (error) {
     const errorMessage =
