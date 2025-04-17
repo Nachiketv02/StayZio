@@ -45,7 +45,7 @@ function Profile() {
                   <p className="text-white/80">{userData?.email}</p>
                 </div>
               </div>
-              <motion.button
+              {/* <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsEditing(!isEditing)}
@@ -53,7 +53,7 @@ function Profile() {
               >
                 <FaEdit className="w-4 h-4" />
                 <span>{isEditing ? 'Cancel' : 'Edit Profile'}</span>
-              </motion.button>
+              </motion.button> */}
             </div>
           </div>
 
