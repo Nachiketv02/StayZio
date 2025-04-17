@@ -31,10 +31,10 @@ import toast from "react-hot-toast";
 
 function Home() {
   const [searchParams, setSearchParams] = useState({
-    location: '',
-    checkIn: '',
+    location: "",
+    checkIn: "",
     daysOfStay: 1,
-    guests: 1
+    guests: 1,
   });
 
   const navigate = useNavigate();
@@ -118,7 +118,7 @@ function Home() {
       rating: 4.9,
       popularCities: ["Tokyo", "Kyoto", "Osaka"],
       highlights: ["Cherry Blossoms", "Ancient Temples", "Modern Cities"],
-      averagePrice: "$200/night",
+      averagePrice: "₹20000/night",
     },
     {
       name: "Italy",
@@ -129,7 +129,7 @@ function Home() {
       rating: 4.8,
       popularCities: ["Rome", "Florence", "Venice"],
       highlights: ["Historic Sites", "Cuisine", "Art Galleries"],
-      averagePrice: "$180/night",
+      averagePrice: "₹18000/night",
     },
     {
       name: "Thailand",
@@ -140,7 +140,7 @@ function Home() {
       rating: 4.7,
       popularCities: ["Bangkok", "Phuket", "Chiang Mai"],
       highlights: ["Beaches", "Temples", "Street Food"],
-      averagePrice: "$120/night",
+      averagePrice: "₹12000/night",
     },
     {
       name: "France",
@@ -151,7 +151,7 @@ function Home() {
       rating: 4.8,
       popularCities: ["Paris", "Nice", "Lyon"],
       highlights: ["Architecture", "Wine Regions", "Fashion"],
-      averagePrice: "$220/night",
+      averagePrice: "₹22000/night",
     },
     {
       name: "Greece",
@@ -162,7 +162,7 @@ function Home() {
       rating: 4.7,
       popularCities: ["Athens", "Santorini", "Mykonos"],
       highlights: ["Islands", "Ancient Ruins", "Local Cuisine"],
-      averagePrice: "$160/night",
+      averagePrice: "₹16000/night",
     },
     {
       name: "Spain",
@@ -173,7 +173,7 @@ function Home() {
       rating: 4.8,
       popularCities: ["Barcelona", "Madrid", "Seville"],
       highlights: ["Beaches", "Architecture", "Nightlife"],
-      averagePrice: "$170/night",
+      averagePrice: "₹17000/night",
     },
   ];
 
@@ -469,7 +469,7 @@ function Home() {
             {countries.map((country, index) => (
               <motion.div
                 key={country.name}
-                className="group relative bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col h-full" // Added flex and h-full here
+                className="group relative bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -479,8 +479,6 @@ function Home() {
                 whileHover={{ y: -8 }}
               >
                 <div className="relative h-72 flex-shrink-0">
-                  {" "}
-                  {/* Added flex-shrink-0 */}
                   <img
                     src={country.image}
                     alt={country.name}
@@ -507,8 +505,6 @@ function Home() {
                 </div>
 
                 <div className="p-6 flex-grow flex flex-col">
-                  {" "}
-                  {/* Added flex classes */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <FaPlane className="text-primary-500 w-5 h-5 mr-2" />
@@ -521,8 +517,6 @@ function Home() {
                     </span>
                   </div>
                   <div className="space-y-4 flex-grow">
-                    {" "}
-                    {/* Added flex-grow */}
                     <div>
                       <h4 className="text-sm font-semibold text-gray-500 mb-2">
                         Popular Cities
@@ -554,14 +548,19 @@ function Home() {
                       </div>
                     </div>
                   </div>
-                  <motion.button
-                    className="mt-6 w-full bg-primary-600 text-white py-3 rounded-xl font-medium flex items-center justify-center space-x-2"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                  <Link
+                    to="/properties"
+                    state={{ searchParams: { location: country.name } }}
                   >
-                    <span>Explore {country.name}</span>
-                    <FaArrowRight className="w-4 h-4" />
-                  </motion.button>
+                    <motion.button
+                      className="mt-6 w-full bg-primary-600 text-white py-3 rounded-xl font-medium flex items-center justify-center space-x-2"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <span>Explore {country.name}</span>
+                      <FaArrowRight className="w-4 h-4" />
+                    </motion.button>
+                  </Link>
                 </div>
               </motion.div>
             ))}

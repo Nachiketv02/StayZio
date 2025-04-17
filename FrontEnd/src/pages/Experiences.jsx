@@ -12,7 +12,7 @@ function Experiences() {
       reviews: 128,
       duration: "2 hours",
       groupSize: "2-6 people",
-      price: 75,
+      price: 20000,
       host: {
         name: "Sakura Tanaka",
         image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80"
@@ -30,7 +30,7 @@ function Experiences() {
       reviews: 256,
       duration: "4 hours",
       groupSize: "4-8 people",
-      price: 120,
+      price: 12000,
       host: {
         name: "Marco Rossi",
         image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80"
@@ -48,7 +48,7 @@ function Experiences() {
       reviews: 312,
       duration: "6 hours",
       groupSize: "4-12 people",
-      price: 150,
+      price: 15000,
       host: {
         name: "Ahmed Hassan",
         image: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&q=80"
@@ -120,7 +120,7 @@ function Experiences() {
                   <div className="flex items-center justify-between">
                     <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
                       <span className="font-semibold text-primary-600">
-                        ${experience.price}
+                        ₹{experience.price}
                       </span>
                       <span className="text-gray-600"> / person</span>
                     </div>

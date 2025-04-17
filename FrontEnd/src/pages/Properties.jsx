@@ -17,6 +17,7 @@ import {
   FaDumbbell,
   FaDog,
   FaUmbrellaBeach,
+  FaMapMarkerAlt
 } from "react-icons/fa";
 import useFavoriteStore from "../store/favoriteStore";
 import toast from "react-hot-toast";
@@ -26,7 +27,7 @@ import {
   removeFavorite,
   getFavorites,
 } from "../services/User/UserApi";
-import {useLocation} from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { UserDataContext } from "../context/UserContex";
 
 function Properties() {
@@ -132,25 +133,54 @@ function Properties() {
   }, []);
 
   const filteredProperties = properties.filter((property) => {
+    // Handle location filter from search input
     if (filters.location) {
       const search = filters.location.toLowerCase();
       const inTitle = property.title?.toLowerCase().includes(search);
       const inLocation = property.location?.toLowerCase().includes(search);
       const inCountry = property.country?.toLowerCase().includes(search);
-    
+
       if (!inTitle && !inLocation && !inCountry) {
         return false;
       }
     }
-    if (searchParams.location && !property.location.toLowerCase().includes(searchParams.location.toLowerCase()) && !property.country.toLowerCase().includes(searchParams.location.toLowerCase())) {
-      return false;
+    // Handle country filter from home page
+    else if (searchParams.location) {
+      const search = searchParams.location.toLowerCase();
+      const inLocation = property.location?.toLowerCase().includes(search);
+      const inCountry = property.country?.toLowerCase().includes(search);
+
+      if (!inLocation && !inCountry) {
+        return false;
+      }
     }
+
+    {searchParams.location && (
+      <div className="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <div className="flex items-center">
+          <FaMapMarkerAlt className="text-blue-500 mr-3" />
+          <div>
+            <p className="font-medium text-blue-800">
+              Showing properties in {searchParams.location}
+            </p>
+            <button 
+              onClick={() => window.history.replaceState({}, document.title)}
+              className="text-blue-600 text-sm hover:underline mt-1"
+            >
+              Clear location filter
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
     if (
       filters.propertyType !== "all" &&
       property.type !== filters.propertyType
     ) {
       return false;
     }
+
     const price = property.price;
     switch (filters.priceRange) {
       case "1000-3000":
@@ -265,14 +295,16 @@ function Properties() {
                 No properties found matching your criteria.
               </p>
               <button
-                onClick={() =>
+                onClick={() => {
                   setFilters({
                     location: "",
                     priceRange: "all",
                     propertyType: "all",
                     amenities: [],
-                  })
-                }
+                  });
+                  // Clear the location state
+                  window.history.replaceState({}, document.title);
+                }}
                 className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
               >
                 Clear Filters
