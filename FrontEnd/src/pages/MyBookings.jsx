@@ -274,6 +274,11 @@ function MyBookings() {
                                 </span>
                               )}
                             </div>
+                          ) : new Date(booking.checkOut) < today ? (
+                            <div className="flex items-center bg-[#F3F4F6] rounded-full px-4 py-2 text-sm">
+                              <FaCheckCircle className="w-5 h-5 mr-2 text-sm" />
+                              <span>Completed</span>
+                            </div>
                           ) : (
                             <div className="flex items-center text-green-600">
                               <FaCheckCircle className="w-5 h-5 mr-2" />
