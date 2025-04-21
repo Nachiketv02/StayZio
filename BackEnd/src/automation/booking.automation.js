@@ -40,7 +40,6 @@ const removeUnverifiedUsers = async () => {
       isVerified: false,
       createdAt: { $lte: fiveMinutesAgo },
     });
-    console.log("Cleaned up unverified users");
   } catch (error) {
     console.error("Error cleaning up unverified users:", error);
   }
@@ -49,5 +48,8 @@ const removeUnverifiedUsers = async () => {
 console.log("Starting cron job scheduler...");
 cron.schedule("0 * * * *", async () => {
   await bookingAutomation();
+});
+
+cron.schedule("* * * * *", async () => {
   await removeUnverifiedUsers();
 });

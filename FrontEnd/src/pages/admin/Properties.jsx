@@ -245,7 +245,7 @@ function Properties() {
                     </td>
                   )}
                   <td className="px-4 py-4 hidden lg:table-cell">
-                    <div className="text-sm text-gray-500">{property.updatedAt?.slice(0, 10)}</div>
+                    <div className="text-sm text-gray-500">{property.createdAt?.slice(0, 10)}</div>
                   </td>
                   <td className="px-4 py-4 text-right">
                     <div className="flex justify-end space-x-2">

@@ -67,7 +67,6 @@ export const deleteProperty = async (id) => {
 export const getAllUsers = async () => {
   try {
     const response = await api.get("/users");
-    console.log(response.data);
     return response.data;
   } catch (error) {
     const errorMessage =

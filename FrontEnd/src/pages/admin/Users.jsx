@@ -7,7 +7,6 @@ import {
 import UserDetails from '../../components/Admin/User/UserDetails';
 import UserForm from '../../components/Admin/User/UserForm';
 import { getAllUsers, deleteUser } from '../../services/Admin/AdminApi';
-import { SearchIcon, PlusIcon, RefreshIcon } from '../../components/Icon/Icons';
 import DeleteUserModal from '../../components/Admin/User/DeleteUserModal';  
 
 function Users() {

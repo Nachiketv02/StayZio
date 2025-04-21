@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { EditIcon, TrashIcon } from '../../Icon/Icons';
+import { FaArrowLeft } from 'react-icons/fa';
 
-function UserDetails({ user, onEdit, onDelete }) {
+function UserDetails({ user, onEdit, onDelete, onBack }) {
   if (!user) return null;
 
   const formatDate = (dateString) => {
@@ -24,7 +25,17 @@ function UserDetails({ user, onEdit, onDelete }) {
     >
       <div className="p-6 border-b border-gray-200">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">User Details</h2>
+          <div className="flex items-center space-x-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+            >
+              <FaArrowLeft className="w-5 h-5" />
+            </motion.button>
+            <h2 className="text-2xl font-bold text-gray-900">User Details</h2>
+          </div>
           <div className="flex space-x-2">
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -185,6 +196,7 @@ function UserDetails({ user, onEdit, onDelete }) {
         </div>
       </div>
     </motion.div>
+    
   );
 }
 
