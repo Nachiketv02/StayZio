@@ -16,5 +16,7 @@ router.delete('/property/:id', authMiddleware.isAuthenticated, authMiddleware.is
 // User Routes
 
 router.get('/users', authMiddleware.isAuthenticated, authMiddleware.isAdmin, userController.getAllUser);
+router.put('/user/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, userController.updateUser);
+router.delete('/user/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, userController.deleteUser);
 
 module.exports = router;

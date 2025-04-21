@@ -78,9 +78,22 @@ export const getAllUsers = async () => {
   }
 };
 
-export const deleteUser = async() => {
+export const updateUser = async (id, formData) => {
   try {
-    const response = await api.delete("/user");
+    const response = await api.put(`/user/${id}`, formData);
+    return response.data.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to update user. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const deleteUser = async (id) => {
+  try {
+    const response = await api.delete(`/user/${id}`);
     return response.data.data;
   } catch (error) {
     const errorMessage =

@@ -64,7 +64,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/admin/*" element={<Dashboard />} />
+        <Route path="/admin/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/*" element={<PublicLayout />} />
       </Routes>
     </Router>
