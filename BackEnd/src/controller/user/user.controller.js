@@ -214,6 +214,7 @@ module.exports.register = async (req, res) => {
 
     const existingUser = await userModel.findOne({
       $or: [{ email }, { phone }],
+      isVerified: true,
     });
     if (existingUser) {
       return res
