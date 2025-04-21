@@ -4,11 +4,16 @@ import { FaUsers, FaHome, FaChartBar, FaCalendarAlt, FaBell, FaCog, FaSignOutAlt
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import Properties from './Properties'
 import Users from './Users'
+import { logout } from '../../services/User/UserApi'
+import { useContext } from 'react'
+import { UserDataContext } from '../../context/UserContex'
 
 function Dashboard() {
   const navigate = useNavigate()
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(location.pathname.split('/')[2] || 'overview')
+
+  const { userData, setUserData, isAuthenticated, setIsAuthenticated } =useContext(UserDataContext);
 
   const stats = [
     {
@@ -78,22 +83,6 @@ function Dashboard() {
           <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
           <p className="text-gray-600">Welcome back, Admin</p>
         </div>
-        <div className="flex space-x-4">
-          <motion.button
-            className="px-4 py-2 bg-white rounded-lg shadow-sm text-gray-600 hover:bg-gray-50"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <FaBell className="w-5 h-5" />
-          </motion.button>
-          <motion.button
-            className="px-4 py-2 bg-white rounded-lg shadow-sm text-gray-600 hover:bg-gray-50"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <FaCog className="w-5 h-5" />
-          </motion.button>
-        </div>
       </div>
 
       {/* Stats Grid */}
@@ -145,6 +134,17 @@ function Dashboard() {
     </div>
   )
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setUserData(null);
+      setIsAuthenticated(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -183,6 +183,7 @@ function Dashboard() {
               className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
               whileHover={{ x: 5 }}
               whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
             >
               <FaSignOutAlt className="w-5 h-5" />
               <span>Logout</span>

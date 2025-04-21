@@ -9,6 +9,7 @@ import {
   FaHeart,
   FaHome,
   FaCalendarAlt,
+  FaUserShield,
 } from "react-icons/fa";
 import { UserDataContext } from "../context/UserContex";
 import { logout } from "../services/User/UserApi";
@@ -66,8 +67,17 @@ function Navbar() {
     useFavoriteStore.getState().setFavorites([]);
   };
 
+  const handleAdminPanel = () => {
+    navigate("/admin");
+    setIsProfileOpen(false);
+  };
+
   const handleProfile = () => {
-    navigate("/profile");
+    if (userData.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/profile");
+    }
     setIsProfileOpen(false);
   };
 
@@ -218,30 +228,46 @@ function Navbar() {
                       className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-50 overflow-hidden"
                     >
                       <div className="flex flex-col divide-y divide-gray-200">
+                        {userData.role === "admin" && (
+                          <motion.button
+                            className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                            onClick={handleAdminPanel}
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            <FaUserShield className="w-4 h-4 mr-2" />
+                            Admin Panel
+                          </motion.button>
+                        )}
                         <motion.button
                           className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                           onClick={handleProfile}
                           whileHover={{ scale: 1.05 }}
                         >
                           <FaUser className="w-4 h-4 mr-2" />
-                          Profile
+                          {userData.role === "admin"
+                            ? "Admin Profile"
+                            : "Profile"}
                         </motion.button>
-                        <motion.button
-                          className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                          onClick={handleMyProperties}
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          <FaHome className="w-4 h-4 mr-2" />
-                          My Properties
-                        </motion.button>
-                        <motion.button
-                          className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                          onClick={handleMyBookings}
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          <FaCalendarAlt className="w-4 h-4 mr-2" />
-                          Your Bookings
-                        </motion.button>
+                        {userData.role !== "admin" && (
+                          <>
+                            <motion.button
+                              className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                              onClick={handleMyProperties}
+                              whileHover={{ scale: 1.05 }}
+                            >
+                              <FaHome className="w-4 h-4 mr-2" />
+                              My Properties
+                            </motion.button>
+                            <motion.button
+                              className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                              onClick={handleMyBookings}
+                              whileHover={{ scale: 1.05 }}
+                            >
+                              <FaCalendarAlt className="w-4 h-4 mr-2" />
+                              Your Bookings
+                            </motion.button>
+                          </>
+                        )}
                         <motion.button
                           className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                           onClick={handleLogout}
@@ -396,39 +422,53 @@ function Navbar() {
               </Link>
               {isAuthenticated ? (
                 <div className="pt-4 space-y-3">
+                {userData.role === "admin" && (
                   <motion.button
-                    className="w-full flex items-center justify-center space-x-2 text-blue-600 border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-medium transition-colors"
+                    className="w-full flex items-center justify-center space-x-2 text-purple-600 border-2 border-purple-400 bg-purple-50 hover:bg-purple-100 px-6 py-3 rounded-full font-medium transition-colors"
                     whileHover={{ scale: 1.02 }}
-                    onClick={handleProfile}
+                    onClick={handleAdminPanel}
                   >
-                    <FaUserCircle className="w-5 h-5" />
-                    <span>Profile</span>
+                    <FaUserShield className="w-5 h-5" />
+                    <span>Admin Panel</span>
                   </motion.button>
-                  <motion.button
-                    className="w-full flex items-center justify-center space-x-2 text-blue-600 border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-medium transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    onClick={handleMyProperties}
-                  >
-                    <FaHome className="w-5 h-5" />
-                    <span>My Properties</span>
-                  </motion.button>
-                  <motion.button
-                    className="w-full flex items-center justify-center space-x-2 text-blue-600 border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-medium transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    onClick={handleMyBookings}
-                  >
-                    <FaCalendarAlt className="w-5 h-5" />
-                    <span>My Bookings</span>
-                  </motion.button>
-                  <motion.button
-                    className="w-full flex items-center justify-center space-x-2 text-red-600 border-2 border-red-200 bg-red-50 hover:bg-red-100 px-6 py-3 rounded-full font-medium transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    onClick={handleLogout}
-                  >
-                    <FaSignOutAlt className="w-5 h-5" />
-                    <span>Logout</span>
-                  </motion.button>
-                </div>
+                )}
+                <motion.button
+                  className="w-full flex items-center justify-center space-x-2 text-blue-600 border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-medium transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  onClick={handleProfile}
+                >
+                  <FaUserCircle className="w-5 h-5" />
+                  <span>{userData.role === "admin" ? "Admin Profile" : "Profile"}</span>
+                </motion.button>
+                {userData.role !== "admin" && (
+                  <>
+                    <motion.button
+                      className="w-full flex items-center justify-center space-x-2 text-blue-600 border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-medium transition-colors"
+                      whileHover={{ scale: 1.02 }}
+                      onClick={handleMyProperties}
+                    >
+                      <FaHome className="w-5 h-5" />
+                      <span>My Properties</span>
+                    </motion.button>
+                    <motion.button
+                      className="w-full flex items-center justify-center space-x-2 text-blue-600 border-2 border-blue-400 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-medium transition-colors"
+                      whileHover={{ scale: 1.02 }}
+                      onClick={handleMyBookings}
+                    >
+                      <FaCalendarAlt className="w-5 h-5" />
+                      <span>My Bookings</span>
+                    </motion.button>
+                  </>
+                )}
+                <motion.button
+                  className="w-full flex items-center justify-center space-x-2 text-red-600 border-2 border-red-200 bg-red-50 hover:bg-red-100 px-6 py-3 rounded-full font-medium transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  onClick={handleLogout}
+                >
+                  <FaSignOutAlt className="w-5 h-5" />
+                  <span>Logout</span>
+                </motion.button>
+              </div>
               ) : (
                 <div className="pt-4 space-y-3">
                   <motion.button

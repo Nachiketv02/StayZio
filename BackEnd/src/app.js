@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const connectDB = require("./db/db");
 const userRoute = require("./routes/user/user.route");
+const adminRoute = require("./routes/admin/admin.route");
 
 connectDB();
 require("./automation/booking.automation");
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/stayzio/user", userRoute);
+app.use("/stayzio/admin", adminRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
