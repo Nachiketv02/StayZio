@@ -64,7 +64,6 @@ function Properties() {
     return result;
   }, [properties, searchTerm, sortBy]);
 
-  // Get current properties
   const indexOfLastProperty = currentPage * propertiesPerPage;
   const indexOfFirstProperty = indexOfLastProperty - propertiesPerPage;
   const currentProperties = filteredAndSortedProperties.slice(indexOfFirstProperty, indexOfLastProperty);
@@ -125,7 +124,6 @@ function Properties() {
         </motion.button>
       </div>
 
-      {/* Add Property Modal */}
       {showAddForm && (
         <AddPropertyForm 
           onClose={() => setShowAddForm(false)}
@@ -133,7 +131,6 @@ function Properties() {
         />
       )}
 
-      {/* View Property Modal */}
       {viewProperty && (
         <ViewPropertyModal
           property={viewProperty}
@@ -145,7 +142,6 @@ function Properties() {
         />
       )}
 
-      {/* Edit Property Modal */}
       {editProperty && (
         <EditPropertyModal
           property={editProperty}
@@ -154,7 +150,6 @@ function Properties() {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
       {deleteProperty && (
         <DeleteConfirmationModal
           property={deleteProperty}
@@ -163,7 +158,6 @@ function Properties() {
         />
       )}
 
-      {/* Filters and Search */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
@@ -193,7 +187,6 @@ function Properties() {
         </div>
       </div>
 
-      {/* Properties Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="w-full">
           <table className="w-full">

@@ -61,3 +61,32 @@ export const deleteProperty = async (id) => {
     throw new Error(errorMessage);
   }
 };
+
+//User
+
+export const getAllUsers = async () => {
+  try {
+    const response = await api.get("/users");
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch users. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
+
+export const deleteUser = async() => {
+  try {
+    const response = await api.delete("/user");
+    return response.data.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to delete user. Please try again.";
+    throw new Error(errorMessage);
+  }
+};
