@@ -8,7 +8,6 @@ import Signup from './pages/Signup'
 import BecomeHost from './pages/BecomeHost'
 import ListProperty from './pages/ListProperty'
 import PropertyDetails from './pages/PropertyDetails'
-import Dashboard from './pages/admin/Dashboard'
 import ComingSoon from './pages/ComingSoon'
 import OTPVerification from './pages/OTPVerification'
 import Profile from './pages/Profile'
@@ -23,7 +22,7 @@ import EditProperty from './pages/EditProperty';
 import Booking from './pages/Booking';
 import BookingConfirmation from './pages/BookingConfirmation';
 import MyBookings from './pages/MyBookings';
-import Users from './pages/admin/Users';
+import Dashboard from './pages/admin/Dashboard';
 import { Toaster } from 'react-hot-toast'
 
 function PublicLayout() {

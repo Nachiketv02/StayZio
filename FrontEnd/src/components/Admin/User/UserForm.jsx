@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaSave } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaUser, FaEnvelope, FaPhone, FaVenusMars, FaLock, FaUserShield, FaCheckCircle } from 'react-icons/fa';
 import { updateUser } from '../../../services/Admin/AdminApi';
 
 function UserForm({ user, onBack, onSuccess }) {
@@ -106,208 +106,275 @@ function UserForm({ user, onBack, onSuccess }) {
     }
   };
 
+  const inputClasses = (error) => `
+    mt-1 block w-full px-4 py-3 bg-gray-50 border rounded-lg 
+    transition-colors duration-200 ease-in-out
+    ${error 
+      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+      : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500'
+    }
+    focus:ring-2 focus:ring-opacity-50 focus:outline-none
+  `;
+
+  const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="bg-white rounded-xl shadow-sm overflow-hidden"
+      className="bg-white rounded-xl shadow-lg overflow-hidden"
     >
-      <div className="p-6 border-b border-gray-200">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onBack}
-              className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+              className="p-2 text-white hover:bg-blue-600 rounded-lg"
             >
               <FaArrowLeft className="w-5 h-5" />
             </motion.button>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Edit User
+            <h2 className="text-2xl font-bold text-white">
+              {user ? 'Edit User' : 'Add New User'}
             </h2>
           </div>
         </div>
       </div>
 
       {submitError && (
-        <div className="bg-red-50 p-4 m-6 rounded-lg">
-          <p className="text-red-700">{submitError}</p>
+        <div className="mx-6 mt-6">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg"
+          >
+            <p className="text-red-700">{submitError}</p>
+          </motion.div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-              Full Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm ${
-                errors.fullName ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {errors.fullName && (
-              <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
-            )}
-          </div>
+      <form onSubmit={handleSubmit} className="p-6 space-y-8">
+        {/* Basic Information */}
+        <div className="bg-gray-50 p-6 rounded-xl">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Basic Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="fullName" className={labelClasses}>
+                <div className="flex items-center space-x-2">
+                  <FaUser className="text-gray-400" />
+                  <span>Full Name <span className="text-red-500">*</span></span>
+                </div>
+              </label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                className={inputClasses(errors.fullName)}
+                placeholder="Enter full name"
+              />
+              {errors.fullName && (
+                <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email Address <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm ${
-                errors.email ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
-          </div>
+            <div>
+              <label htmlFor="email" className={labelClasses}>
+                <div className="flex items-center space-x-2">
+                  <FaEnvelope className="text-gray-400" />
+                  <span>Email Address <span className="text-red-500">*</span></span>
+                </div>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={inputClasses(errors.email)}
+                placeholder="Enter email address"
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-              Phone Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm ${
-                errors.phone ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {errors.phone && (
-              <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-            )}
-          </div>
+            <div>
+              <label htmlFor="phone" className={labelClasses}>
+                <div className="flex items-center space-x-2">
+                  <FaPhone className="text-gray-400" />
+                  <span>Phone Number <span className="text-red-500">*</span></span>
+                </div>
+              </label>
+              <input
+                type="text"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className={inputClasses(errors.phone)}
+                placeholder="Enter phone number"
+              />
+              {errors.phone && (
+                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-              Gender <span className="text-red-500">*</span>
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-            >
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-              <span className="text-xs text-gray-500 ml-1">(Leave blank to keep current)</span>
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm ${
-                errors.password ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm ${
-                errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-              User Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-            >
-              <option value="user">Regular User</option>
-              <option value="admin">Administrator</option>
-            </select>
-          </div>
-
-          <div className="md:col-span-2">
-            <div className="flex flex-col space-y-4">
-              <div className="flex items-center">
-                <input
-                  id="isVerified"
-                  name="isVerified"
-                  type="checkbox"
-                  checked={formData.isVerified}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="isVerified" className="ml-2 block text-sm text-gray-700">
-                  Mark as Verified
-                </label>
-              </div>
-              
-              <div className="flex items-center">
-                <input
-                  id="isHost"
-                  name="isHost"
-                  type="checkbox"
-                  checked={formData.isHost}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="isHost" className="ml-2 block text-sm text-gray-700">
-                  Make User a Host
-                </label>
-              </div>
+            <div>
+              <label htmlFor="gender" className={labelClasses}>
+                <div className="flex items-center space-x-2">
+                  <FaVenusMars className="text-gray-400" />
+                  <span>Gender <span className="text-red-500">*</span></span>
+                </div>
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className={inputClasses()}
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 flex justify-end space-x-3">
+        {/* Security Information */}
+        <div className="bg-gray-50 p-6 rounded-xl">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Security</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="password" className={labelClasses}>
+                <div className="flex items-center space-x-2">
+                  <FaLock className="text-gray-400" />
+                  <span>
+                    Password
+                    {user && <span className="text-xs text-gray-500 ml-1">(Leave blank to keep current)</span>}
+                  </span>
+                </div>
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={inputClasses(errors.password)}
+                placeholder="Enter password"
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className={labelClasses}>
+                <div className="flex items-center space-x-2">
+                  <FaLock className="text-gray-400" />
+                  <span>Confirm Password</span>
+                </div>
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={inputClasses(errors.confirmPassword)}
+                placeholder="Confirm password"
+              />
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Role & Status */}
+        <div className="bg-gray-50 p-6 rounded-xl">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Role & Status</h3>
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <label htmlFor="role" className={labelClasses}>
+                <div className="flex items-center space-x-2">
+                  <FaUserShield className="text-gray-400" />
+                  <span>User Role</span>
+                </div>
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className={inputClasses()}
+              >
+                <option value="user">Regular User</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col space-y-4">
+              <label className="relative inline-flex items-center">
+                <input
+                  type="checkbox"
+                  name="isVerified"
+                  checked={formData.isVerified}
+                  onChange={handleChange}
+                  className="sr-only"
+                />
+                <div className={`
+                  w-14 h-7 bg-gray-200 rounded-full peer 
+                  ${formData.isVerified ? 'bg-green-600' : 'bg-gray-200'}
+                  transition-colors duration-200
+                `}>
+                  <div className={`
+                    absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-200
+                    ${formData.isVerified ? 'translate-x-7' : 'translate-x-0'}
+                  `}></div>
+                </div>
+                <span className="ml-3 text-sm font-medium text-gray-900">Verified User</span>
+              </label>
+
+              <label className="relative inline-flex items-center">
+                <input
+                  type="checkbox"
+                  name="isHost"
+                  checked={formData.isHost}
+                  onChange={handleChange}
+                  className="sr-only"
+                />
+                <div className={`
+                  w-14 h-7 bg-gray-200 rounded-full peer
+                  ${formData.isHost ? 'bg-blue-600' : 'bg-gray-200'}
+                  transition-colors duration-200
+                `}>
+                  <div className={`
+                    absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-200
+                    ${formData.isHost ? 'translate-x-7' : 'translate-x-0'}
+                  `}></div>
+                </div>
+                <span className="ml-3 text-sm font-medium text-gray-900">Host Status</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Form Actions */}
+        <div className="flex justify-end space-x-4 pt-6">
           <motion.button
             type="button"
             onClick={onBack}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 
+              transition-colors duration-200 flex items-center space-x-2"
           >
             Cancel
           </motion.button>
@@ -316,10 +383,12 @@ function UserForm({ user, onBack, onSuccess }) {
             disabled={isSubmitting}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center space-x-2`}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg
+              hover:from-blue-700 hover:to-blue-800 transition-colors duration-200
+              disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             <FaSave className="w-4 h-4" />
-            <span>{isSubmitting ? 'Updating...' : 'Update User'}</span>
+            <span>{isSubmitting ? 'Saving...' : user ? 'Update User' : 'Create User'}</span>
           </motion.button>
         </div>
       </form>

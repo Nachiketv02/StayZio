@@ -1,79 +1,104 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { FaUsers, FaHome, FaChartBar, FaCalendarAlt, FaBell, FaCog, FaSignOutAlt } from 'react-icons/fa'
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import Properties from './Properties'
-import Users from './Users'
-import { logout } from '../../services/User/UserApi'
-import { useContext } from 'react'
-import { UserDataContext } from '../../context/UserContex'
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  FaUsers, FaHome, FaChartBar, FaCalendarAlt, FaSignOutAlt,
+  FaMoneyBillWave, FaUserCheck, FaBuilding, FaChartLine
+} from 'react-icons/fa';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import Properties from './Properties';
+import Users from './Users';
+import Bookings from './Bookings';
+import Reports from '../../components/Admin/Dashboard/Reports';
+import { logout } from '../../services/User/UserApi';
+import { useContext } from 'react';
+import { UserDataContext } from '../../context/UserContex';
+import { getDashboardStats } from '../../services/Admin/AdminApi';
+import TrendChart from '../../components/Admin/Dashboard/TrendChart';
 
 function Dashboard() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [activeTab, setActiveTab] = useState(location.pathname.split('/')[2] || 'overview')
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.pathname.split('/')[2] || 'overview');
+  const [stats, setStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [bookingTrendsData, setBookingTrendsData] = useState([]);
+const [revenueAnalysisData, setRevenueAnalysisData] = useState([]);
 
-  const { userData, setUserData, isAuthenticated, setIsAuthenticated } =useContext(UserDataContext);
 
-  const stats = [
+  const { userData, setUserData, isAuthenticated, setIsAuthenticated } = useContext(UserDataContext);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getDashboardStats();
+        setStats(data);
+        setBookingTrendsData(data.bookingTrends || []);
+        setRevenueAnalysisData(data.revenueAnalysis || []);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const defaultStats = [
     {
       title: "Total Properties",
-      value: "1,234",
-      change: "+12%",
-      icon: FaHome,
+      value: stats?.propertyCount || "0",
+      change: stats?.propertyGrowth || "+0%",
+      icon: FaBuilding,
       color: "bg-blue-500"
     },
     {
       title: "Active Users",
-      value: "5,678",
-      change: "+8%",
-      icon: FaUsers,
+      value: stats?.userCount || "0",
+      change: stats?.userGrowth || "+0%",
+      icon: FaUserCheck,
       color: "bg-green-500"
     },
     {
       title: "Total Bookings",
-      value: "892",
-      change: "+15%",
+      value: stats?.bookingCount || "0",
+      change: stats?.bookingGrowth || "+0%",
       icon: FaCalendarAlt,
       color: "bg-purple-500"
     },
     {
       title: "Revenue",
-      value: "$45,678",
-      change: "+20%",
-      icon: FaChartBar,
+      value: `₹${stats?.totalRevenue || "0"}`,
+      change: stats?.revenueGrowth || "+0%",
+      icon: FaMoneyBillWave,
       color: "bg-yellow-500"
     }
-  ]
-
-  const recentActivities = [
+  ];
+  
+  const recentActivities = stats?.recentActivities || [
     {
       type: "New Property",
-      description: "Luxury Villa in Bali was added",
-      time: "2 hours ago",
+      description: "Loading...",
+      time: "",
       icon: FaHome,
       color: "bg-blue-100 text-blue-600"
-    },
-    {
-      type: "New Booking",
-      description: "Mountain Retreat booked for 5 nights",
-      time: "4 hours ago",
-      icon: FaCalendarAlt,
-      color: "bg-green-100 text-green-600"
-    },
-    {
-      type: "User Registration",
-      description: "New host registered: Sarah Johnson",
-      time: "6 hours ago",
-      icon: FaUsers,
-      color: "bg-purple-100 text-purple-600"
     }
-  ]
+  ];
 
   const handleTabClick = (tabName) => {
-    setActiveTab(tabName)
-    navigate(`/admin/${tabName === 'overview' ? '' : tabName}`)
-  }
+    setActiveTab(tabName);
+    navigate(`/admin/${tabName === 'overview' ? '' : tabName}`);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setUserData(null);
+      setIsAuthenticated(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const renderOverview = () => (
     <div className="p-8">
@@ -81,13 +106,22 @@ function Dashboard() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-600">Welcome back, Admin</p>
+          <p className="text-gray-600">Welcome back, {userData?.fullName || 'Admin'}</p>
         </div>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate('/admin/reports')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center space-x-2"
+        >
+          <FaChartLine className="w-4 h-4" />
+          <span>View Reports</span>
+        </motion.button>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
+        {defaultStats.map((stat, index) => (
           <motion.div
             key={stat.title}
             className="bg-white rounded-xl shadow-sm p-6"
@@ -99,12 +133,52 @@ function Dashboard() {
               <div className={`${stat.color} p-3 rounded-lg`}>
                 <stat.icon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-green-500 text-sm font-medium">{stat.change}</span>
+              <span className={`text-sm font-medium ${
+                parseFloat(stat.change) >= 0 ? 'text-green-500' : 'text-red-500'
+              }`}>
+                {stat.change}
+              </span>
             </div>
             <h3 className="text-gray-600 text-sm font-medium">{stat.title}</h3>
             <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
           </motion.div>
         ))}
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Booking Trends Chart */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-4">Booking Trends</h3>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <TrendChart 
+              chartData={bookingTrendsData} 
+              reportType="bookings"
+              height={300}
+            />
+          )}
+        </div>
+
+        {/* Revenue Analysis Chart */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-4">Revenue Analysis</h3>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <TrendChart 
+              chartData={revenueAnalysisData} 
+              reportType="revenue"
+              height={300}
+              showComparison={true}
+            />
+          )}
+        </div>
       </div>
 
       {/* Recent Activity */}
@@ -120,7 +194,7 @@ function Dashboard() {
               transition={{ delay: index * 0.1 }}
             >
               <div className={`${activity.color} p-3 rounded-lg`}>
-                <activity.icon className="w-5 h-5" />
+                <FaHome className="w-5 h-5" />
               </div>
               <div className="flex-1">
                 <h3 className="text-gray-900 font-medium">{activity.type}</h3>
@@ -132,18 +206,7 @@ function Dashboard() {
         </div>
       </div>
     </div>
-  )
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setUserData(null);
-      setIsAuthenticated(false);
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -159,8 +222,7 @@ function Dashboard() {
               { name: 'Properties', icon: FaHome, path: 'properties' },
               { name: 'Users', icon: FaUsers, path: 'users' },
               { name: 'Bookings', icon: FaCalendarAlt, path: 'bookings' },
-              { name: 'Notifications', icon: FaBell, path: 'notifications' },
-              { name: 'Settings', icon: FaCog, path: 'settings' }
+              { name: 'Reports', icon: FaChartLine, path: 'reports' }
             ].map((item) => (
               <motion.button
                 key={item.path}
@@ -198,11 +260,12 @@ function Dashboard() {
           <Route path="/" element={renderOverview()} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/users" element={<Users />} />
-          {/* Add other routes here */}
+          <Route path="/bookings" element={<Bookings />} />
+          <Route path="/reports" element={<Reports />} />
         </Routes>
       </div>
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;
