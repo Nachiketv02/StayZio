@@ -4,7 +4,7 @@ const userModel = require('../../model/user/user.model');
 
 module.exports.getDashboardStats = async (req, res) => {
   try {
-    const [propertyCount, userCount, bookingCount, totalRevenue, recentBookings] = await Promise.all([
+    const [propertyCount, userCount, bookingCount, totalRevenue, recentBookings, recentProperties, recentUsers] = await Promise.all([
       propertyListingModel.countDocuments(),
       userModel.countDocuments(),
       bookingModel.countDocuments(),
@@ -14,9 +14,16 @@ module.exports.getDashboardStats = async (req, res) => {
       ]),
       bookingModel.find()
         .sort({ createdAt: -1 })
-        .limit(5)
+        .limit(3)
         .populate('propertyId')
-        .populate('userId')
+        .populate('userId'),
+      propertyListingModel.find()
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .populate('userId'),
+      userModel.find()
+        .sort({ createdAt: -1 })
+        .limit(3)
     ]);
 
     const currentDate = new Date();
@@ -38,18 +45,30 @@ module.exports.getDashboardStats = async (req, res) => {
       ])
     ]);
 
-    const [bookingTrends, revenueAnalysis] = await Promise.all([
-      getBookingTrendsData(),
-      getRevenueAnalysisData()
-    ]);
-
-    const recentActivities = recentBookings.map(booking => ({
-      type: 'New Booking',
-      description: `Booking for ${booking.propertyId?.title || 'Deleted Property'} by ${booking.userId?.fullName || 'Deleted User'}`,
-      time: booking.createdAt,
-      icon: 'FaCalendarAlt',
-      color: 'bg-purple-100 text-purple-600'
-    }));
+    const recentActivities = [
+      ...recentBookings.map(booking => ({
+        type: 'New Booking',
+        description: `Booking for ${booking.propertyId?.title || 'Deleted Property'} by ${booking.userId?.fullName || 'Deleted User'}`,
+        time: booking.createdAt,
+        icon: 'FaCalendarAlt',
+        color: 'bg-purple-100 text-purple-600'
+      })),
+      ...recentProperties.map(property => ({
+        type: 'New Property',
+        description: `${property.title} added by ${property.userId?.fullName || 'Deleted User'}`,
+        time: property.createdAt,
+        icon: 'FaHome',
+        color: 'bg-blue-100 text-blue-600'
+      })),
+      ...recentUsers.map(user => ({
+        type: 'New User',
+        description: `${user.fullName} (${user.email}) joined`,
+        time: user.createdAt,
+        icon: 'FaUserPlus',
+        color: 'bg-green-100 text-green-600'
+      }))
+    ].sort((a, b) => new Date(b.time) - new Date(a.time))
+     .slice(0, 5);
 
     const calculateGrowthPercentage = (previousValue, currentValue) => {
       if (previousValue === 0) {
@@ -71,8 +90,8 @@ module.exports.getDashboardStats = async (req, res) => {
         userGrowth: calculateGrowthPercentage(lastMonthUserCount, userCount),
         bookingGrowth: calculateGrowthPercentage(lastMonthBookingCount, bookingCount),
         revenueGrowth: calculateGrowthPercentage(lastMonthRevenue[0]?.total || 0, totalRevenue[0]?.total || 0),
-        bookingTrends,
-        revenueAnalysis
+        bookingTrends: await getBookingTrendsData(),
+        revenueAnalysis: await getRevenueAnalysisData()
       }
     });
   } catch (error) {

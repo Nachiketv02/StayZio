@@ -23,6 +23,7 @@ import Booking from './pages/Booking';
 import BookingConfirmation from './pages/BookingConfirmation';
 import MyBookings from './pages/MyBookings';
 import Dashboard from './pages/admin/Dashboard';
+import NotFoundPage from './pages/NotFoundPage';
 import { Toaster } from 'react-hot-toast'
 
 function PublicLayout() {
@@ -65,6 +66,7 @@ function App() {
       <Routes>
         <Route path="/admin/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/*" element={<PublicLayout />} />
+        <Route path="/not-found" element={<NotFoundPage />} />
       </Routes>
     </Router>
   )

@@ -53,7 +53,6 @@ function Login() {
     if (Object.keys(newErrors).length === 0) {
       try {
         const response = await login(formData);
-        console.log('Login response:', response);
         setUserData(response.user);
         setIsAuthenticated(true);
         localStorage.setItem('token', response.token);
